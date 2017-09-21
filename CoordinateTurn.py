@@ -1,46 +1,6 @@
 import math
 
 
-class Point:
-    x = 0
-    y = 0
-    z = 0
-
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
-
-    def get_xyz(self):
-        return self.x, self.y, self.z
-
-
-class Vector:
-    xV = 0
-    yV = 0
-    zV = 0
-
-    def __init__(self, xV, yV, zV):
-        self.xV = xV
-        self.yV = yV
-        self.zV = zV
-
-
-class Cube:
-    # pointA1 = None
-    # pointA2 = None
-    # pointA3 = None
-    # pointA4 = None
-    # pointB1 = None
-    # pointB2 = None
-    # pointB3 = None
-    # pointB4 = None
-    # pointList = [None, None, None, None, None, None, None, None]
-
-    def __init__(self, point_list):
-        self.point_list = point_list
-
-
 class CoordinateRotate:
 
     @staticmethod

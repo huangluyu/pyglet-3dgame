@@ -1,7 +1,8 @@
 import pyglet, math, time
-import CoordinateTurn
+import CoordinateTurn, Player, BasicEntity as BE
 
 window = pyglet.window.Window(800, 600)
+# window.set_exclusive_mouse(True)
 label = pyglet.text.Label('去你妈的祖国的花朵',
                           font_name = 'Times New Roman',
                           font_size = 36,
@@ -11,15 +12,6 @@ player_ship = pyglet.graphics.draw(2, pyglet.gl.GL_POINTS,
                          ('v2i', (10, 15, 30, 35)),
                          ('c3B', (0, 0, 255, 0, 255, 0))
                          )
-
-
-class Player:
-    location = CoordinateTurn.Point
-    faceTo = CoordinateTurn.Vector
-
-    def __init__(self, location, faceTo):
-        self.location = location
-        self.faceTo = faceTo
 
 
 def draw_line(a, b, ta, tb):
@@ -48,10 +40,10 @@ def draw_square(radius, angle, k):
 
 
 angle = 0
+player = None
 
 
 def change_angle(dt):
-    window.clear()
     global angle
     radius = 200
     angle = angle + dt * 50
@@ -66,5 +58,28 @@ def on_draw():
     radius = 100
 
 
-pyglet.clock.schedule_interval(change_angle, 1/60.0)
+@window.event()
+def on_mouse_motion(x, y, dx, dy):
+    global player
+    # player.face_up(-dy)
+    # player.face_left(dx)
+    # print(player)
+
+
+def init():
+    global player
+    player = Player.Player(BE.Point(0, 0, 0), BE.Point(0, 0, 0, 1, 90, 0))
+    cube = BE.Cube(BE.Point(0, 0, 100), 200)
+    print(cube)
+
+
+def tick_draw(dt):
+    window.clear()
+    change_angle(dt)
+
+
+# init()
+print(BE.Point(1, 2, 3))
+print(BE.Point(0, 0, 0, 3.7, 63.4, 36.6))
+pyglet.clock.schedule_interval(tick_draw, 1/60.0)
 pyglet.app.run()
