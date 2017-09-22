@@ -4,6 +4,7 @@ class Player:
     location = None
     faceTo = None
     dpi = 100
+    player = None
 
     def __init__(self, location, faceTo):
         self.location = location

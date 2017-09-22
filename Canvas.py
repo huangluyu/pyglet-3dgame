@@ -1,5 +1,5 @@
 import pyglet, math, time
-import CoordinateTurn, Player, BasicEntity as BE
+import CoordinateTurn, Player, BasicEntity as BE, World
 
 window = pyglet.window.Window(800, 600)
 # window.set_exclusive_mouse(True)
@@ -41,7 +41,7 @@ def draw_square(radius, angle, k):
 
 angle = 0
 player = None
-
+world = None
 
 def change_angle(dt):
     global angle
@@ -61,16 +61,18 @@ def on_draw():
 @window.event()
 def on_mouse_motion(x, y, dx, dy):
     global player
-    # player.face_up(-dy)
-    # player.face_left(dx)
+    player.face_up(-dy)
+    player.face_left(dx)
     # print(player)
 
 
 def init():
-    global player
+    global player, world
     player = Player.Player(BE.Point(0, 0, 0), BE.Point(0, 0, 0, 1, 90, 0))
-    cube = BE.Cube(BE.Point(0, 0, 100), 200)
-    print(cube)
+    world = World.World()
+    world.put(BE.Cube(BE.Point(0, 0, 100), 200))
+    world.put(BE.Cube(BE.Point(200, 200, 100), 200))
+    # print
 
 
 def tick_draw(dt):
@@ -78,7 +80,7 @@ def tick_draw(dt):
     change_angle(dt)
 
 
-# init()
+init()
 print(BE.Point(1, 2, 3))
 print(BE.Point(0, 0, 0, 3.7, 63.4, 36.6))
 pyglet.clock.schedule_interval(tick_draw, 1/60.0)

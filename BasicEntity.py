@@ -32,8 +32,10 @@ class Point:
 
     def turn_sphere(self):
         self.r = math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
-        self.angle_z = math.acos(self.z / self.r) * 180 / math.pi
-        self.angle_x = math.acos(self.x / math.sqrt(self.x ** 2 + self.y ** 2)) * 180 / math.pi
+        if self.r > 0:
+            self.angle_z = math.acos(self.z / self.r) * 180 / math.pi
+            if not (self.x == 0 and self.y == 0):
+                self.angle_x = math.acos(self.x / math.sqrt(self.x ** 2 + self.y ** 2)) * 180 / math.pi
 
     def __str__(self):
         return '点的坐标为: %.3f, %.3f, %.3f 长度为%.3f 横轴%.3f度 纵轴%.3f度' % (
@@ -60,7 +62,14 @@ class Vector:
         self.zV = round(z / k , 2)
 
 
-class Cube:
+# 实体
+class BasicEntity:
+    point_list = []
+    link_list = [[]]
+
+
+# 方块
+class Cube(BasicEntity):
     # pointA1 = None
     # pointA2 = None
     # pointA3 = None
@@ -69,15 +78,19 @@ class Cube:
     # pointB2 = None
     # pointB3 = None
     # pointB4 = None
-    pointList = [None, None, None, None, None, None, None, None]
-    link = [[1, 2], [2, 3], [3, 4], [4, 1],
-            [5, 6], [6, 7], [7, 8], [8, 5],
-            [1, 5], [2, 6], [3, 7], [4, 8]]
+    point_list = []
+
 
     def __init__(self, center, length):
-        self.point_list = self.__point_list(center, length)
+        self.point_list = self.__cube_point_list(center, length)
+        self.link_list = [
+            [0, 1], [1, 2], [2, 3], [3, 0],
+            [4, 5], [5, 6], [6, 7], [7, 4],
+            [0, 4], [1, 5], [2, 6], [3, 7]
+        ]
 
-    def __point_list(self, center, length):
+    @staticmethod
+    def __cube_point_list(center, length):
         return [
             Point(center.x + length / 2, center.y + length / 2, center.z + length / 2),
             Point(center.x - length / 2, center.y + length / 2, center.z + length / 2),
@@ -89,3 +102,26 @@ class Cube:
             Point(center.x + length / 2, center.y - length / 2, center.z - length / 2)
         ]
 
+
+# 平面
+class Plane:
+    # 平面方程 Ax + By + Cz + D = 0
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+
+    def __init__(self, a, b, c, d):
+        self.a = a
+        self.b = b
+        self.c = c
+        self.d = d
+
+    def check_point(self, point):
+        answer = self.a * point.x + self.b * point.y + self.c * point.z + self.d
+        if round(answer, 3) == 0:
+            return 0
+        elif answer < 0:
+            return -1
+        else:
+            return 1
