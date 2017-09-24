@@ -1,30 +1,39 @@
 import BasicEntity
 
+
 class Player:
     location = None
-    faceTo = None
-    dpi = 100
+    face_to = None
     player = None
+    personal_set = None
 
-    def __init__(self, location, faceTo):
+    def __init__(self, location, face_to):
         self.location = location
-        self.faceTo = faceTo
+        self.face_to = face_to
+        self.personal_set = Set()
 
     def face_up(self, change):
-        self.faceTo.angle_z += change * self.dpi / 150
-        if self.faceTo.angle_z > 180:
-            self.faceTo.angle_z = 180
-        elif self.faceTo.angle_z < 0:
-            self.faceTo.angle_z = 0
+        self.face_to.angle_z += change * self.personal_set.dpi / 150
+        if self.face_to.angle_z > 180:
+            self.face_to.angle_z = 180
+        elif self.face_to.angle_z < 0:
+            self.face_to.angle_z = 0
 
     def face_left(self, change):
-        self.faceTo.angle_x += change * self.dpi / 150
-        if self.faceTo.angle_x > 360:
-            self.faceTo.angle_x -= 360
-        elif self.faceTo.angle_x < 0:
-            self.faceTo.angle_x += 360
+        self.face_to.angle_x += change * self.personal_set.dpi / 150
+        if self.face_to.angle_x > 360:
+            self.face_to.angle_x -= 360
+        elif self.face_to.angle_x < 0:
+            self.face_to.angle_x += 360
 
     def __str__(self):
         return '人物的坐标为:%.3f, %.3f, %.3f, 面朝:正向%.3f度, 垂直%.3f度' % (
-            self.location.x, self.location.y, self.location.z, self.faceTo.angle_x, self.faceTo.angle_z
+            self.location.x, self.location.y, self.location.z, self.face_to.angle_x, self.face_to.angle_z
         )
+
+
+class Set:
+    dpi = 100
+    visual_range = 1000
+    screen_width = 1000
+    screen_height = 800

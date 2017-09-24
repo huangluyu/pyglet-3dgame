@@ -24,6 +24,9 @@ class Point:
     def get_xyz(self):
         return self.x, self.y, self.z
 
+    def modulo_fang(self):
+        return  self.x ** 2 + self.y ** 2 + self.z ** 2
+
     def turn_descartes(self):
         l = math.sin(self.angle_z * math.pi / 180) * self.r
         self.x = l * math.cos(self.angle_x * math.pi / 180)
@@ -37,29 +40,22 @@ class Point:
             if not (self.x == 0 and self.y == 0):
                 self.angle_x = math.acos(self.x / math.sqrt(self.x ** 2 + self.y ** 2)) * 180 / math.pi
 
+    def __add__(self, point):
+        self.x += point.x
+        self.y += point.y
+        self.z += point.z
+        return self
+
+    def __sub__(self, point):
+        self.x -= point.x
+        self.y -= point.y
+        self.z -= point.z
+        return self
+
     def __str__(self):
         return '点的坐标为: %.3f, %.3f, %.3f 长度为%.3f 横轴%.3f度 纵轴%.3f度' % (
             self.x, self.y, self.z, self.r, self.angle_x, self.angle_z
         )
-
-
-# 球坐标系向量
-class Vector:
-    x = 0
-    y = 0
-    z = 0
-
-    def __init__(self, r, angle_x, angle_z):
-        # self.reset(r, angle_x, angle_z)
-        self.r = r
-        self.angle_x = angle_x
-        self.angle_z = angle_z
-
-    def reset(self, x, y, z):
-        k = math.sqrt(x ** 2 + y ** 2 + z ** 2)
-        self.xV = round(x / k , 2)
-        self.yV = round(y / k , 2)
-        self.zV = round(z / k , 2)
 
 
 # 实体
