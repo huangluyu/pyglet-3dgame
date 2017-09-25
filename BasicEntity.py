@@ -27,6 +27,21 @@ class Point:
     def modulo_fang(self):
         return  self.x ** 2 + self.y ** 2 + self.z ** 2
 
+    def to_modulo_one(self):
+        module = math.sqrt(self.modulo_fang())
+        self.x /= module
+        self.y /= module
+        self.z /= module
+        self.turn_sphere()
+        return self
+
+    def reverse(self):
+        self.x *= -1
+        self.y *= -1
+        self.z *= -1
+        self.turn_sphere()
+        return self
+
     def turn_descartes(self):
         l = math.sin(self.angle_z * math.pi / 180) * self.r
         self.x = l * math.cos(self.angle_x * math.pi / 180)
@@ -34,7 +49,12 @@ class Point:
         self.z = math.cos(self.angle_z * math.pi / 180) * self.r
 
     def turn_sphere(self):
-        self.r = math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
+        print(type((self.z ** 2)))
+        self.r = math.sqrt(
+            (self.x ** 2)
+            + (self.y ** 2)
+            + (self.z ** 2)
+        )
         if self.r > 0:
             self.angle_z = math.acos(self.z / self.r) * 180 / math.pi
             if not (self.x == 0 and self.y == 0):
@@ -44,12 +64,21 @@ class Point:
         self.x += point.x
         self.y += point.y
         self.z += point.z
+        self.turn_sphere()
         return self
 
     def __sub__(self, point):
         self.x -= point.x
         self.y -= point.y
         self.z -= point.z
+        self.turn_sphere()
+        return self
+
+    def __mul__(self, point):
+        self.x *= point.x
+        self.y *= point.y
+        self.z *= point.z
+        self.turn_sphere()
         return self
 
     def __str__(self):

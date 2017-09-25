@@ -78,18 +78,40 @@ class Canvas:
         # print(k)
         return BE.Point(plane_x, plane_y, plane_z)
 
-    def space_to_canvas(self, space_point):
+    def space_to_canvas(self, space_point, x_vector, y_vector, canvas_zero):
+        vector = space_point - canvas_zero
+        x = vector * x_vector
+        y = vector * y_vector
+        return BE.Point(x, y, 0)
+
+    def get_new_xy_vector(self):
         player = self.world.player
         canvas_zero = player.location + player.face_to
-
-
+        x_vector = BE.Point(
+            player.face_to.y,
+            - player.face_to.x,
+            0
+        ).to_modulo_one()
+        y_vector = BE.Point(
+            - player.face_to.z / player.face_to.y if player.face_to.y else 0,
+            - player.face_to.z / player.face_to.x if player.face_to.x else 0,
+            player.face_to.y / player.face_to.x  if player.face_to.x else 0 + player.face_to.x / player.face_to.y if player.face_to.y else 0
+        ).to_modulo_one()
+        # y>0时x轴正方向为x增大方向
+        if ((math.cos(player.face_to.angle_x) > 0 and x_vector.x < 0)
+            or (math.cos(player.face_to.angle_x) < 0 and x_vector.x > 0)):
+            x_vector.reverse()
+        if y_vector.z < 0:
+            y_vector.reverse()
+        return x_vector, y_vector, canvas_zero
 
     def tick_draw(self, dt):
         self.plane = self.canvas_plane()
+        x_vector, y_vector, canvas_zero = self.get_new_xy_vector()
         canvas_point_list = []
         for point in self.world.point_list:
             space_point = self.canvas_plane_cross_point(point)
-            canvas_point_list.append(self.space_to_canvas(space_point))
+            canvas_point_list.append(self.space_to_canvas(space_point, x_vector, y_vector, canvas_zero))
         self.window.clear()
         for line in self.world.line_list:
             Canvas.draw_line(canvas_point_list[line[0]].x, canvas_point_list[line[0]].y, canvas_point_list[line[1]].x, canvas_point_list[line[1]].y)
