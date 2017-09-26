@@ -6,6 +6,7 @@ class Player:
     face_to = None
     player = None
     personal_set = None
+    speed = dict(w = False, s=False)
 
     def __init__(self, location, face_to):
         self.location = location
@@ -13,7 +14,7 @@ class Player:
         self.personal_set = Set()
 
     def face_up(self, change):
-        self.face_to.angle_z += change * self.personal_set.dpi / 1000
+        self.face_to.angle_z += change * self.personal_set.dpi / 300
         if self.face_to.angle_z > 180:
             self.face_to.angle_z = 180
         elif self.face_to.angle_z < 0:
@@ -21,12 +22,23 @@ class Player:
         self.face_to.turn_descartes()
 
     def face_left(self, change):
-        self.face_to.angle_x += change * self.personal_set.dpi / 1000
+        self.face_to.angle_x += change * self.personal_set.dpi / 300
         if self.face_to.angle_x > 360:
             self.face_to.angle_x -= 360
         elif self.face_to.angle_x < 0:
             self.face_to.angle_x += 360
         self.face_to.turn_descartes()
+
+    def move_forward(self, dt):
+        if self.speed["w"]:
+            self.location += self.face_to * dt
+            self.location.turn_sphere()
+        elif  self.speed["s"]:
+            self.location -= self.face_to * dt
+            self.location.turn_sphere()
+
+    def move_left(self, change):
+        pass
 
     def __str__(self):
         return '人物的坐标为:%.3f, %.3f, %.3f, 面朝:正向%.3f度, 垂直%.3f度' % (

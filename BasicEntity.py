@@ -62,8 +62,11 @@ class Point:
     def __sub__(self, point):
         return Point(self.x - point.x, self.y - point.y, self.z - point.z)
 
-    def __mul__(self, point):
-        return self.x * point.x + self.y * point.y + self.z * point.z
+    def __mul__(self, target):
+        if type(target) == Point:
+            return self.x * target.x + self.y * target.y + self.z * target.z
+        elif type(target) == int or type(target) == float:
+            return Point(self.x * target, self.y * target, self.z * target)
 
     def __str__(self):
         return '点的坐标为: %.3f, %.3f, %.3f 长度为%.3f 横轴%.3f度 纵轴%.3f度' % (
