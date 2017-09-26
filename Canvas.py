@@ -22,7 +22,6 @@ class Canvas:
             ('v2f', (a, b, ta, tb)),
             ('c3B', (255, 255, 255, 255, 255, 255))
         )
-        print(a, b, ta, tb)
 
     def draw_square(self, radius, angle, k):
         angle *= 2 * math.pi / 360
@@ -49,11 +48,6 @@ class Canvas:
             self.angle = 0
         self.draw_square(radius, self.angle, k)
 
-    def charge_point_location(self):
-        # 计算点在视平面上的投影点
-        for point in self.world.point_list:
-            print('成功获取点列表:')
-
     def canvas_plane(self):
         player = self.world.player
         d = -(
@@ -67,15 +61,11 @@ class Canvas:
     def canvas_plane_cross_point(self, target_point):
         player = self.world.player
         mol = player.face_to.modulo_fang()
-        k = mol / (
-            player.face_to.x * (target_point.x - player.location.x) +
-            player.face_to.y * (target_point.y - player.location.y) +
-            player.face_to.z * (target_point.z - player.location.z)
-        )
+        a = player.face_to.x * (target_point.x - player.location.x) + player.face_to.y * (target_point.y - player.location.y) + player.face_to.z * (target_point.z - player.location.z)
+        k = mol / a if a != 0 else 0
         plane_x = k * (target_point.x - player.location.x) + player.location.x
         plane_y = k * (target_point.y - player.location.y) + player.location.y
         plane_z = k * (target_point.z - player.location.z) + player.location.z
-        # print(k)
         return BE.Point(plane_x, plane_y, plane_z)
 
     def space_to_canvas(self, space_point, x_vector, y_vector, canvas_zero):
@@ -86,6 +76,7 @@ class Canvas:
 
     def get_new_xy_vector(self):
         player = self.world.player
+        print(player)
         canvas_zero = player.location + player.face_to
         x_vector = BE.Point(
             player.face_to.y,
@@ -93,9 +84,9 @@ class Canvas:
             0
         ).to_modulo_one()
         y_vector = BE.Point(
-            - player.face_to.z / player.face_to.y if player.face_to.y else 0,
-            - player.face_to.z / player.face_to.x if player.face_to.x else 0,
-            player.face_to.y / player.face_to.x  if player.face_to.x else 0 + player.face_to.x / player.face_to.y if player.face_to.y else 0
+            - player.face_to.z * player.face_to.x,
+            - player.face_to.z * player.face_to.y,
+            player.face_to.y ** 2 + player.face_to.x ** 2
         ).to_modulo_one()
         # y>0时x轴正方向为x增大方向
         if ((math.cos(player.face_to.angle_x) > 0 and x_vector.x < 0)
@@ -111,13 +102,12 @@ class Canvas:
         canvas_point_list = []
         for point in self.world.point_list:
             space_point = self.canvas_plane_cross_point(point)
-            canvas_point_list.append(self.space_to_canvas(space_point, x_vector, y_vector, canvas_zero))
+            canvas_point = self.space_to_canvas(space_point, x_vector, y_vector, canvas_zero)
+            screen_reset = BE.Point(self.world.player.personal_set.screen_width / 2, self.world.player.personal_set.screen_height / 2, 0)
+            canvas_point_list.append(canvas_point + screen_reset)
         self.window.clear()
         for line in self.world.line_list:
             Canvas.draw_line(canvas_point_list[line[0]].x, canvas_point_list[line[0]].y, canvas_point_list[line[1]].x, canvas_point_list[line[1]].y)
-
-
-        # self.change_angle(dt)
 
 
 # label = pyglet.text.Label('去你妈的祖国的花朵',
@@ -134,9 +124,6 @@ class Canvas:
 world = World.World(Player.Player(BE.Point(0, 0, 100), BE.Point(0, 0, 0, 100, 0, 90)))
 canvas = Canvas(world)
 main_window = canvas.window
-world.put(BE.Cube(BE.Point(0, 0, 100), 200))
-world.put(BE.Cube(BE.Point(200, 200, 100), 200))
-# canvas.charge_point_location()
 
 
 @main_window.event
@@ -150,10 +137,9 @@ def on_mouse_motion(x, y, dx, dy):
     player = world.player
     player.face_up(-dy)
     player.face_left(dx)
-    # print(player)
 
 
-# print(BE.Point(1, 2, 3))
-# print(BE.Point(0, 0, 0, 3.7, 63.4, 36.6))
-pyglet.clock.schedule_interval(canvas.tick_draw, 1)
+# world.put(BE.Cube(BE.Point(0, 0, 100), 200))
+world.put(BE.Cube(BE.Point(200, 200, 100), 200))
+pyglet.clock.schedule_interval(canvas.tick_draw, 1/20)
 pyglet.app.run()

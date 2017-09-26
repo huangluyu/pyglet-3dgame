@@ -29,10 +29,11 @@ class Point:
 
     def to_modulo_one(self):
         module = math.sqrt(self.modulo_fang())
-        self.x /= module
-        self.y /= module
-        self.z /= module
-        self.turn_sphere()
+        if module > 0 :
+            self.x /= module
+            self.y /= module
+            self.z /= module
+            self.turn_sphere()
         return self
 
     def reverse(self):
@@ -44,42 +45,25 @@ class Point:
 
     def turn_descartes(self):
         l = math.sin(self.angle_z * math.pi / 180) * self.r
-        self.x = l * math.cos(self.angle_x * math.pi / 180)
-        self.y = l * math.sin(self.angle_x * math.pi / 180)
-        self.z = math.cos(self.angle_z * math.pi / 180) * self.r
+        self.x = round(l * math.cos(self.angle_x * math.pi / 180), 3)
+        self.y = round(l * math.sin(self.angle_x * math.pi / 180), 3)
+        self.z = round(math.cos(self.angle_z * math.pi / 180) * self.r, 3)
 
     def turn_sphere(self):
-        print(type((self.z ** 2)))
-        self.r = math.sqrt(
-            (self.x ** 2)
-            + (self.y ** 2)
-            + (self.z ** 2)
-        )
+        self.r = math.sqrt(self.modulo_fang())
         if self.r > 0:
             self.angle_z = math.acos(self.z / self.r) * 180 / math.pi
             if not (self.x == 0 and self.y == 0):
                 self.angle_x = math.acos(self.x / math.sqrt(self.x ** 2 + self.y ** 2)) * 180 / math.pi
 
     def __add__(self, point):
-        self.x += point.x
-        self.y += point.y
-        self.z += point.z
-        self.turn_sphere()
-        return self
+        return Point(self.x + point.x, self.y + point.y, self.z + point.z)
 
     def __sub__(self, point):
-        self.x -= point.x
-        self.y -= point.y
-        self.z -= point.z
-        self.turn_sphere()
-        return self
+        return Point(self.x - point.x, self.y - point.y, self.z - point.z)
 
     def __mul__(self, point):
-        self.x *= point.x
-        self.y *= point.y
-        self.z *= point.z
-        self.turn_sphere()
-        return self
+        return self.x * point.x + self.y * point.y + self.z * point.z
 
     def __str__(self):
         return '点的坐标为: %.3f, %.3f, %.3f 长度为%.3f 横轴%.3f度 纵轴%.3f度' % (
