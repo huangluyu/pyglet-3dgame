@@ -61,7 +61,9 @@ class Canvas:
     def canvas_plane_cross_point(self, target_point):
         player = self.world.player
         mol = player.face_to.modulo_fang()
-        a = player.face_to.x * (target_point.x - player.location.x) + player.face_to.y * (target_point.y - player.location.y) + player.face_to.z * (target_point.z - player.location.z)
+        a = player.face_to.x * (target_point.x - player.location.x) \
+            + player.face_to.y * (target_point.y - player.location.y) \
+            + player.face_to.z * (target_point.z - player.location.z)
         k = mol / a if a != 0 else 0
         plane_x = k * (target_point.x - player.location.x) + player.location.x
         plane_y = k * (target_point.y - player.location.y) + player.location.y
@@ -103,24 +105,32 @@ class Canvas:
         A = player.face_to.x
         B = player.face_to.y
         C = player.face_to.z
-        return A * point.x + B * point.y + C * point.z > player.location.x * A + player.location.y * B + player.location.z * C
+        return A * point.x + B * point.y + C * point.z \
+               > player.location.x * A + player.location.y * B + player.location.z * C
 
     def tick_draw(self, dt):
         self.plane = self.canvas_plane()
         x_vector, y_vector, canvas_zero = self.get_new_xy_vector()
         canvas_point_list = []
         canvas_point_visible = []
-        self.world.player.move_forward(dt)
+        self.world.player.move(dt)
         for point in self.world.point_list:
             space_point = self.canvas_plane_cross_point(point)
             canvas_point = self.space_to_canvas(space_point, x_vector, y_vector, canvas_zero)
-            screen_reset = BE.Point(self.world.player.personal_set.screen_width / 2, self.world.player.personal_set.screen_height / 2, 0)
+            screen_reset = BE.Point(
+                self.world.player.personal_set.screen_width / 2,
+                self.world.player.personal_set.screen_height / 2,
+                0
+            )
             canvas_point_list.append(canvas_point + screen_reset)
             canvas_point_visible.append(self.is_visible(point))
         self.window.clear()
         for line in self.world.line_list:
             if (canvas_point_visible[line[0]] and canvas_point_visible[line[1]]):
-                Canvas.draw_line(canvas_point_list[line[0]].x, canvas_point_list[line[0]].y, canvas_point_list[line[1]].x, canvas_point_list[line[1]].y)
+                Canvas.draw_line(
+                    canvas_point_list[line[0]].x, canvas_point_list[line[0]].y,
+                    canvas_point_list[line[1]].x, canvas_point_list[line[1]].y
+                )
             # elif (canvas_point_visible[line[0]]):
             #     self.world.point_list[]
             #     Canvas.draw_line(canvas_point_list[line[0]].x, canvas_point_list[line[0]].y, canvas_point_list[line[1]].x, canvas_point_list[line[1]].y)
@@ -144,6 +154,7 @@ canvas = Canvas(world)
 main_window = canvas.window
 key = pyglet.window.key
 
+
 @main_window.event
 def on_draw():
     radius = 100
@@ -165,14 +176,24 @@ def on_key_press(symbol, modifiers):
     elif symbol == key.S:
         world.player.speed['w'] = False
         world.player.speed['s'] = True
+    elif symbol == key.A:
+        world.player.speed['d'] = False
+        world.player.speed['a'] = True
+    elif symbol == key.D:
+        world.player.speed['a'] = False
+        world.player.speed['d'] = True
 
 
 @main_window.event()
 def on_key_release(symbol, modifiers):
     if symbol == key.W:
         world.player.speed['w'] = False
-    if symbol == key.S:
+    elif symbol == key.S:
         world.player.speed['s'] = False
+    elif symbol == key.A:
+        world.player.speed['a'] = False
+    elif symbol == key.D:
+        world.player.speed['d'] = False
 
 
 world.put(BE.Cube(BE.Point(0, 0, 100), 200))
