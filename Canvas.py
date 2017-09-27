@@ -75,8 +75,6 @@ class Canvas:
         vector = space_point - canvas_zero
         x = vector * x_vector
         y = vector * y_vector
-        # x = math.sqrt(x) if x > 0 else - math.sqrt(-x)
-        # y = math.sqrt(y) if y > 0 else - math.sqrt(-y)
         return BE.Point(x, y, 0)
 
     def get_new_xy_vector(self):
@@ -196,7 +194,18 @@ def on_key_release(symbol, modifiers):
         world.player.speed['d'] = False
 
 
-world.put(BE.Cube(BE.Point(0, 0, 100), 200))
+world.put(BE.Cube(BE.Point(0, 200, 200), 200))
+world.put(BE.Cube(BE.Point(0, 200, 400), 200))
+world.put(BE.Cube(BE.Point(0, 200, 600), 200))
+world.put(BE.Cube(BE.Point(0, 200, 800), 200))
+world.put(BE.Cube(BE.Point(0, 400, 200), 200))
+world.put(BE.Cube(BE.Point(0, 400, 400), 200))
+world.put(BE.Cube(BE.Point(0, 400, 600), 200))
+world.put(BE.Cube(BE.Point(0, 400, 800), 200))
+world.put(BE.Cube(BE.Point(0, 600, 200), 200))
+world.put(BE.Cube(BE.Point(0, 600, 400), 200))
+world.put(BE.Cube(BE.Point(0, 600, 600), 200))
+world.put(BE.Cube(BE.Point(0, 600, 800), 200))
 # world.put(BE.Cube(BE.Point(200, 200, 100), 200))
 pyglet.clock.schedule_interval(canvas.tick_draw, 1/60)
 pyglet.app.run()

@@ -115,6 +115,24 @@ class Cube(BasicEntity):
         ]
 
 
+#
+class Square:
+    point_list = []
+    link_list = []
+
+    def __init__(self, center, length):
+        self.point_list = [
+            Point(center.x - length / 2, center.y - length / 2, center.z + length / 2),
+            Point(center.x + length / 2, center.y - length / 2, center.z + length / 2),
+            Point(center.x - length / 2, center.y - length / 2, center.z - length / 2),
+            Point(center.x + length / 2, center.y - length / 2, center.z - length / 2)
+        ]
+        self.link_list = [
+            [0, 1], [1, 2], [2, 3], [3, 0]
+        ]
+
+
+
 # 平面
 class Plane:
     # 平面方程 Ax + By + Cz + D = 0
