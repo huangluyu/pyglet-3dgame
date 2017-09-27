@@ -73,6 +73,8 @@ class Canvas:
         vector = space_point - canvas_zero
         x = vector * x_vector
         y = vector * y_vector
+        # x = math.sqrt(x) if x > 0 else - math.sqrt(-x)
+        # y = math.sqrt(y) if y > 0 else - math.sqrt(-y)
         return BE.Point(x, y, 0)
 
     def get_new_xy_vector(self):
@@ -152,7 +154,7 @@ def on_mouse_motion(x, y, dx, dy):
     global world
     player = world.player
     player.face_up(-dy)
-    player.face_left(dx)
+    player.face_left(-dx)
 
 
 @main_window.event()
@@ -175,5 +177,5 @@ def on_key_release(symbol, modifiers):
 
 world.put(BE.Cube(BE.Point(0, 0, 100), 200))
 # world.put(BE.Cube(BE.Point(200, 200, 100), 200))
-pyglet.clock.schedule_interval(canvas.tick_draw, 1/20)
+pyglet.clock.schedule_interval(canvas.tick_draw, 1/60)
 pyglet.app.run()
