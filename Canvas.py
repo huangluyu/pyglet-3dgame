@@ -180,19 +180,32 @@ def on_key_press(symbol, modifiers):
     elif symbol == key.D:
         world.player.speed['a'] = False
         world.player.speed['d'] = True
+    if symbol == key.SPACE:
+        world.player.speed['space'] = True
+        world.player.speed['c'] = False
+    elif symbol == key.C:
+        world.player.speed['space'] = False
+        world.player.speed['c'] = True
+    if symbol == key.LSHIFT:
+        world.player.speed['shift'] = True
 
 
 @main_window.event()
 def on_key_release(symbol, modifiers):
     if symbol == key.W:
         world.player.speed['w'] = False
-    elif symbol == key.S:
+    if symbol == key.S:
         world.player.speed['s'] = False
     if symbol == key.A:
         world.player.speed['a'] = False
-    elif symbol == key.D:
+    if symbol == key.D:
         world.player.speed['d'] = False
-
+    if symbol == key.SPACE:
+        world.player.speed['space'] = False
+    if symbol == key.C:
+        world.player.speed['c'] = False
+    if symbol == key.LSHIFT:
+        world.player.speed['shift'] = False
 
 world.put(BE.Cube(BE.Point(0, 200, 200), 200))
 world.put(BE.Cube(BE.Point(0, 200, 400), 200))

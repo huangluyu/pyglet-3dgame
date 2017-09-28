@@ -6,7 +6,7 @@ class Player:
     face_to = None
     player = None
     personal_set = None
-    speed = dict(w = False, s = False, a = False, d = False)
+    speed = dict(w = False, s = False, a = False, d = False, shift = False, space = False, c = False)
 
     def __init__(self, location, face_to):
         self.location = location
@@ -33,12 +33,18 @@ class Player:
         move_to = BasicEntity.Point(0, 0, 0)
         if self.speed["w"]:
             move_to += self.face_to * -1
-        elif self.speed["s"]:
+        if self.speed["s"]:
             move_to += self.face_to
-        elif self.speed["d"]:
+        if self.speed["d"]:
             move_to += BasicEntity.Point(-self.face_to.y, self.face_to.x, 0).to_modulo_one() * 100
-        elif self.speed["a"]:
+        if self.speed["a"]:
             move_to += BasicEntity.Point(self.face_to.y, -self.face_to.x, 0).to_modulo_one() * 100
+        if self.speed['space']:
+            move_to += BasicEntity.Point(0, 0, -1).to_modulo_one() * 100
+        if self.speed['c']:
+            move_to += BasicEntity.Point(0, 0, 1).to_modulo_one() * 100
+        if self.speed['shift']:
+            move_to *= 3
         self.location -= move_to * dt
         self.location.turn_sphere()
 
