@@ -70,12 +70,12 @@ class Canvas:
         plane_z = k * (target_point.z - player.location.z) + player.location.z
         return BE.Point(plane_x, plane_y, plane_z)
 
-    @staticmethod
-    def space_to_canvas(space_point, x_vector, y_vector, canvas_zero):
+    def space_to_canvas(self, space_point, x_vector, y_vector, canvas_zero):
         vector = space_point - canvas_zero
         x = vector * x_vector
         y = vector * y_vector
-        return BE.Point(x, y, 0)
+        set = self.world.player.personal_set
+        return BE.Point(x * 250 / set.screen_range, y * 250 / set.screen_range, 0)
 
     def get_new_xy_vector(self):
         player = self.world.player
@@ -174,7 +174,7 @@ def on_key_press(symbol, modifiers):
     elif symbol == key.S:
         world.player.speed['w'] = False
         world.player.speed['s'] = True
-    elif symbol == key.A:
+    if symbol == key.A:
         world.player.speed['d'] = False
         world.player.speed['a'] = True
     elif symbol == key.D:
@@ -188,7 +188,7 @@ def on_key_release(symbol, modifiers):
         world.player.speed['w'] = False
     elif symbol == key.S:
         world.player.speed['s'] = False
-    elif symbol == key.A:
+    if symbol == key.A:
         world.player.speed['a'] = False
     elif symbol == key.D:
         world.player.speed['d'] = False

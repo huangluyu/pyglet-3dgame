@@ -30,20 +30,17 @@ class Player:
         self.face_to.turn_descartes()
 
     def move(self, dt):
+        move_to = BasicEntity.Point(0, 0, 0)
         if self.speed["w"]:
-            self.location += self.face_to * dt
-            self.location.turn_sphere()
+            move_to += self.face_to * -1
         elif self.speed["s"]:
-            self.location -= self.face_to * dt
-            self.location.turn_sphere()
-        else:
-            move_to = BasicEntity.Point(-self.face_to.y, self.face_to.x, 0).to_modulo_one() * 100
-            if self.speed["a"]:
-                self.location += move_to * dt
-                self.location.turn_sphere()
-            elif self.speed["d"]:
-                self.location -= move_to * dt
-                self.location.turn_sphere()
+            move_to += self.face_to
+        elif self.speed["d"]:
+            move_to += BasicEntity.Point(-self.face_to.y, self.face_to.x, 0).to_modulo_one() * 100
+        elif self.speed["a"]:
+            move_to += BasicEntity.Point(self.face_to.y, -self.face_to.x, 0).to_modulo_one() * 100
+        self.location -= move_to * dt
+        self.location.turn_sphere()
 
     def __str__(self):
         return '人物的坐标为:%.3f, %.3f, %.3f, 面朝:正向%.3f度, 垂直%.3f度' % (
@@ -54,5 +51,6 @@ class Player:
 class Set:
     dpi = 100
     visual_range = 1000
+    screen_range = 50
     screen_width = 1000
     screen_height = 800
