@@ -1,5 +1,5 @@
-import pyglet, math, time
-import Player, BasicEntity as BE, World
+import pyglet, math
+import BasicEntity as BE
 
 
 class Canvas:
@@ -25,16 +25,16 @@ class Canvas:
 
     def draw_square(self, radius, angle, k):
         angle *= 2 * math.pi / 360
-        pointZeroX = self.world.player.personal_set.screen_width // 2
-        pointZeroY = self.world.player.personal_set.screen_height // 2
-        x1 = pointZeroX + radius * math.cos(angle)
-        y1 = pointZeroY + radius * math.sin(angle) * k
-        x2 = pointZeroX + radius * math.sin(angle)
-        y2 = pointZeroY - radius * math.cos(angle) * k
-        x3 = pointZeroX - radius * math.cos(angle)
-        y3 = pointZeroY - radius * math.sin(angle) * k
-        x4 = pointZeroX - radius * math.sin(angle)
-        y4 = pointZeroY + radius * math.cos(angle) * k
+        point_zero_x = self.world.player.personal_set.screen_width // 2
+        point_zero_y = self.world.player.personal_set.screen_height // 2
+        x1 = point_zero_x + radius * math.cos(angle)
+        y1 = point_zero_y + radius * math.sin(angle) * k
+        x2 = point_zero_x + radius * math.sin(angle)
+        y2 = point_zero_y - radius * math.cos(angle) * k
+        x3 = point_zero_x - radius * math.cos(angle)
+        y3 = point_zero_y - radius * math.sin(angle) * k
+        x4 = point_zero_x - radius * math.sin(angle)
+        y4 = point_zero_y + radius * math.cos(angle) * k
         self.draw_line(x1, y1, x2, y2)
         self.draw_line(x2, y2, x3, y3)
         self.draw_line(x3, y3, x4, y4)
@@ -136,89 +136,12 @@ class Canvas:
             #     Canvas.draw_line(canvas_point_list[line[0]].x, canvas_point_list[line[0]].y, canvas_point_list[line[1]].x, canvas_point_list[line[1]].y)
 
 
-# label = pyglet.text.Label('去你妈的祖国的花朵',
-#                           font_name = 'Times New Roman',
-#                           font_size = 36,
-#                           x = window.width//2, y = window.height//2,
-#                           anchor_x = 'center', anchor_y = 'center')
-# player_ship = pyglet.graphics.draw(2, pyglet.gl.GL_POINTS,
-#                          ('v2i', (10, 15, 30, 35)),
-#                          ('c3B', (0, 0, 255, 0, 255, 0))
-#                          )
-
-
-world = World.World(Player.Player(BE.Point(0, 0, 100), BE.Point(0, 0, 0, 100, 0, 90)))
-canvas = Canvas(world)
-main_window = canvas.window
-key = pyglet.window.key
-
-
-@main_window.event
-def on_draw():
-    radius = 100
-
-
-@main_window.event()
-def on_mouse_motion(x, y, dx, dy):
-    global world
-    player = world.player
-    player.face_up(-dy)
-    player.face_left(-dx)
-
-
-@main_window.event()
-def on_key_press(symbol, modifiers):
-    if symbol == key.W:
-        world.player.speed['w'] = True
-        world.player.speed['s'] = False
-    elif symbol == key.S:
-        world.player.speed['w'] = False
-        world.player.speed['s'] = True
-    if symbol == key.A:
-        world.player.speed['d'] = False
-        world.player.speed['a'] = True
-    elif symbol == key.D:
-        world.player.speed['a'] = False
-        world.player.speed['d'] = True
-    if symbol == key.SPACE:
-        world.player.speed['space'] = True
-        world.player.speed['c'] = False
-    elif symbol == key.C:
-        world.player.speed['space'] = False
-        world.player.speed['c'] = True
-    if symbol == key.LSHIFT:
-        world.player.speed['shift'] = True
-
-
-@main_window.event()
-def on_key_release(symbol, modifiers):
-    if symbol == key.W:
-        world.player.speed['w'] = False
-    if symbol == key.S:
-        world.player.speed['s'] = False
-    if symbol == key.A:
-        world.player.speed['a'] = False
-    if symbol == key.D:
-        world.player.speed['d'] = False
-    if symbol == key.SPACE:
-        world.player.speed['space'] = False
-    if symbol == key.C:
-        world.player.speed['c'] = False
-    if symbol == key.LSHIFT:
-        world.player.speed['shift'] = False
-
-world.put(BE.Cube(BE.Point(0, 200, 200), 200))
-world.put(BE.Cube(BE.Point(0, 200, 400), 200))
-world.put(BE.Cube(BE.Point(0, 200, 600), 200))
-world.put(BE.Cube(BE.Point(0, 200, 800), 200))
-world.put(BE.Cube(BE.Point(0, 400, 200), 200))
-world.put(BE.Cube(BE.Point(0, 400, 400), 200))
-world.put(BE.Cube(BE.Point(0, 400, 600), 200))
-world.put(BE.Cube(BE.Point(0, 400, 800), 200))
-world.put(BE.Cube(BE.Point(0, 600, 200), 200))
-world.put(BE.Cube(BE.Point(0, 600, 400), 200))
-world.put(BE.Cube(BE.Point(0, 600, 600), 200))
-world.put(BE.Cube(BE.Point(0, 600, 800), 200))
-# world.put(BE.Cube(BE.Point(200, 200, 100), 200))
-pyglet.clock.schedule_interval(canvas.tick_draw, 1/60)
-pyglet.app.run()
+    # label = pyglet.text.Label('去你妈的祖国的花朵',
+    #                           font_name = 'Times New Roman',
+    #                           font_size = 36,
+    #                           x = window.width//2, y = window.height//2,
+    #                           anchor_x = 'center', anchor_y = 'center')
+    # player_ship = pyglet.graphics.draw(2, pyglet.gl.GL_POINTS,
+    #                          ('v2i', (10, 15, 30, 35)),
+    #                          ('c3B', (0, 0, 255, 0, 255, 0))
+    #                          )

@@ -15,10 +15,10 @@ class Player:
 
     def face_up(self, change):
         self.face_to.angle_z += change * self.personal_set.dpi / 200
-        if self.face_to.angle_z > 180:
-            self.face_to.angle_z = 180
-        elif self.face_to.angle_z < 0:
-            self.face_to.angle_z = 0
+        if self.face_to.angle_z >= 180:
+            self.face_to.angle_z = 179.99
+        elif self.face_to.angle_z <= 0:
+            self.face_to.angle_z = 0.01
         self.face_to.turn_descartes()
 
     def face_left(self, change):
