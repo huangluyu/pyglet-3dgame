@@ -33,15 +33,15 @@ class Player:
         move_to = BasicEntity.Point(0, 0, 0)
         if self.speed["w"]:
             move_to += self.face_to * -1
-        if self.speed["s"]:
+        elif self.speed["s"]:
             move_to += self.face_to
         if self.speed["d"]:
             move_to += BasicEntity.Point(-self.face_to.y, self.face_to.x, 0).to_modulo_one() * 100
-        if self.speed["a"]:
+        elif self.speed["a"]:
             move_to += BasicEntity.Point(self.face_to.y, -self.face_to.x, 0).to_modulo_one() * 100
         if self.speed['space']:
             move_to += BasicEntity.Point(0, 0, -1).to_modulo_one() * 100
-        if self.speed['c']:
+        elif self.speed['c']:
             move_to += BasicEntity.Point(0, 0, 1).to_modulo_one() * 100
         if self.speed['shift']:
             move_to *= 3

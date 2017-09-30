@@ -8,10 +8,11 @@ class Canvas:
     window = None
     plane = None
 
-    def __init__(self, world):
+    def __init__(self, world, window):
         self.world = world
         personal_set = world.player.personal_set
-        self.window = pyglet.window.Window(personal_set.screen_width, personal_set.screen_height)
+        # self.window = pyglet.window.Window(personal_set.screen_width, personal_set.screen_height)
+        self.window = window
         # self.window.set_exclusive_mouse(True)
 
     @staticmethod
