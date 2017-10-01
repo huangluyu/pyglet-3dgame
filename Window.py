@@ -48,4 +48,3 @@ class Window(pyglet.window.Window):
             self.world.player.speed['c'] = False
         if symbol == key.LSHIFT:
             self.world.player.speed['shift'] = False
-

@@ -2,10 +2,6 @@ import BasicEntity as BE
 
 
 class Scene:
-    # main_world = None
-    #
-    # def __init__(self):
-    #     self.main_world = world
 
     @staticmethod
     def load_cube_3x4():
