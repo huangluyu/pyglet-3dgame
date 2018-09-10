@@ -34,7 +34,8 @@ class Player(DynamicEntity):
     # 位置移动
     def move(self, move_to):
         self.location -= move_to
-        self.location.turn_sphere()
+        # TODO 会发生什么？
+        # self.location.turn_sphere()
 
     # 打印人物信息
     def __str__(self):

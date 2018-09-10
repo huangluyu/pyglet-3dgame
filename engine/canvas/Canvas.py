@@ -1,8 +1,7 @@
 import math
 import pyglet
 
-import engine.entity.base.BasicEntity
-import engine.entity.base.StaticEntity
+from engine.entity.base import BasicEntity
 
 # 画布类
 from engine.config import Set
@@ -20,11 +19,11 @@ class Canvas:
     # 画布平面
     plane = None
     # 时刻
-    dt = 1 / 200
+    dt = 1 / 120
 
+    # 初始化 设置world（保存实体）和window（显示画面）
     def __init__(self, world, window):
         self.world = world
-        # self.window = pyglet.window.Window(personal_set.screen_width, personal_set.screen_height)
         self.window = window
         # self.window.set_exclusive_mouse(True)
 
@@ -56,7 +55,7 @@ class Canvas:
         self.draw_line(x3, y3, x4, y4)
         self.draw_line(x4, y4, x1, y1)
 
-    # 改变角度 ???
+    # 改变角度 用于测试自动旋转
     def change_angle(self, dt):
         radius = 200
         self.angle = self.angle + dt * 50
@@ -74,7 +73,7 @@ class Canvas:
                 + player.face_to.z * player.location.y
                 + math.sqrt(player.face_to.modulo_fang())
         )
-        return engine.entity.base.BasicEntity.Plane(player.face_to.x, player.face_to.y, player.face_to.z, d)
+        return BasicEntity.Plane(player.face_to.x, player.face_to.y, player.face_to.z, d)
 
     # 计算点在画布上的投影点（世界坐标系）
     def canvas_plane_cross_point(self, target_point):
@@ -87,25 +86,27 @@ class Canvas:
         plane_x = k * (target_point.x - player.location.x) + player.location.x
         plane_y = k * (target_point.y - player.location.y) + player.location.y
         plane_z = k * (target_point.z - player.location.z) + player.location.z
-        return engine.entity.base.BasicEntity.Point(plane_x, plane_y, plane_z)
+        return BasicEntity.Point(plane_x, plane_y, plane_z)
 
-    #
-    def space_to_canvas(self, space_point, x_vector, y_vector, canvas_zero):
+    # 空间点投影到画布上获取只有x，y两个坐标的画布点
+    # 参数：空间点坐标，画布坐标系 x 轴方向矢量，y 轴方向矢量，画布原点坐标
+    @staticmethod
+    def space_to_canvas(space_point, x_vector, y_vector, canvas_zero):
         vector = space_point - canvas_zero
         x = vector * x_vector
         y = vector * y_vector
-        return engine.entity.base.BasicEntity.Point(x * 250 / Set.screen_range, y * 250 / Set.screen_range, 0)
+        return BasicEntity.Point(x * 250 / Set.screen_range, y * 250 / Set.screen_range, 0)
 
     # 获得新的画布矢量
     def get_new_xy_vector(self):
         player = self.world.player
         canvas_zero = player.location + player.face_to
-        x_vector = engine.entity.base.BasicEntity.Point(
+        x_vector = BasicEntity.Vector(
             player.face_to.y,
             - player.face_to.x,
             0
         ).to_modulo_one()
-        y_vector = engine.entity.base.BasicEntity.Point(
+        y_vector = BasicEntity.Vector(
             - player.face_to.z * player.face_to.x,
             - player.face_to.z * player.face_to.y,
             player.face_to.y ** 2 + player.face_to.x ** 2
@@ -118,42 +119,44 @@ class Canvas:
         #     y_vector.reverse()
         return x_vector, y_vector, canvas_zero
 
-    # 判断点是否可见
+    # 判断点是否可见（即：是否在后脑勺后面）
     def is_visible(self, point):
         player = self.world.player
         A = player.face_to.x
         B = player.face_to.y
         C = player.face_to.z
-        return A * point.x + B * point.y + C * point.z \
-               > player.location.x * A + player.location.y * B + player.location.z * C
+        return (A * point.x + B * point.y + C * point.z) >\
+               (player.location.x * A + player.location.y * B + player.location.z * C)
 
     # 每个tick时执行该函数绘制画面
     def tick_draw(self, dt):
+        # 移动人物
+        InputControl.player_move(dt)
+
         self.plane = self.canvas_plane()
         x_vector, y_vector, canvas_zero = self.get_new_xy_vector()
 
+        # 存储线及点是否可见
         canvas_point_list = []
         canvas_point_visible = []
 
-        # 移动人物
-        InputControl.player_move(dt)
-        print(World.player)
+        # 屏幕中点
+        screen_reset = BasicEntity.Point(
+            Set.screen_width / 2,
+            Set.screen_height / 2,
+            0
+        )
 
         # 取出当前世界中的点进行计算，转换到画布坐标系上
         for point in self.world.point_list:
             space_point = self.canvas_plane_cross_point(point)
             canvas_point = self.space_to_canvas(space_point, x_vector, y_vector, canvas_zero)
-            screen_reset = engine.entity.base.BasicEntity.Point(
-                Set.screen_width / 2,
-                Set.screen_height / 2,
-                0
-            )
             canvas_point_list.append(canvas_point + screen_reset)
             canvas_point_visible.append(self.is_visible(point))
+
         # 清除画布
         self.window.clear()
         # 重新绘制画布
-        print(canvas_point_list)
         for line in self.world.line_list:
             if canvas_point_visible[line[0]] and canvas_point_visible[line[1]]:
                 Canvas.draw_line(

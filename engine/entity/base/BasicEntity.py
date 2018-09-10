@@ -17,6 +17,48 @@ class Point:
     y = 0
     # z轴坐标
     z = 0
+
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    # 获得坐标轴的值
+    def get_xyz(self):
+        return self.x, self.y, self.z
+
+    # # 翻转？转身?
+    # def reverse(self):
+    #     self.x *= -1
+    #     self.y *= -1
+    #     self.z *= -1
+    #     self.turn_sphere()
+    #     return self
+
+    # 重写 * 变为求两向量点积
+    def __mul__(self, target):
+        if type(target) == int or type(target) == float:
+            return Point(self.x * target, self.y * target, self.z * target)
+
+    # 重写 + 变为两点坐标相加
+    def __add__(self, point):
+        return Point(self.x + point.x, self.y + point.y, self.z + point.z)
+
+    # 重写 - 变为两点坐标相减
+    def __sub__(self, point):
+        return Vector(self.x - point.x, self.y - point.y, self.z - point.z)
+
+    # 输出点的坐标
+    def __str__(self):
+        return '点的坐标为: %.3f, %.3f, %.3f' % (
+            self.x, self.y, self.z
+        )
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class Vector(Point):
     # 球坐标系r
     r = 0
     # 球坐标系x旋转角
@@ -25,6 +67,7 @@ class Point:
     angle_z = 0
 
     def __init__(self, x, y, z, r=0, angle_x=0, angle_z=0):
+        super().__init__(x, y, z)
         if r == 0:
             self.x = x
             self.y = y
@@ -36,37 +79,11 @@ class Point:
             self.angle_z = angle_z
             self.turn_descartes()
 
-    # 获得坐标轴的值
-    def get_xyz(self):
-        return self.x, self.y, self.z
-
-    # 获得x,y,z的模的平方
-    def modulo_fang(self):
-        return self.x ** 2 + self.y ** 2 + self.z ** 2
-
-    # 将x，y，z缩放到模为1
-    def to_modulo_one(self):
-        module = math.sqrt(self.modulo_fang())
-        if module > 0:
-            self.x /= module
-            self.y /= module
-            self.z /= module
-            self.turn_sphere()
-        return self
-
-    # 翻转？转身?
-    def reverse(self):
-        self.x *= -1
-        self.y *= -1
-        self.z *= -1
-        self.turn_sphere()
-        return self
-
     # 将球坐标系的数值同步到直角坐标系上
     def turn_descartes(self):
-        l = math.sin(self.angle_z * math.pi / 180) * self.r
-        self.x = round(l * math.cos(self.angle_x * math.pi / 180), 3)
-        self.y = round(l * math.sin(self.angle_x * math.pi / 180), 3)
+        ln = math.sin(self.angle_z * math.pi / 180) * self.r
+        self.x = round(ln * math.cos(self.angle_x * math.pi / 180), 3)
+        self.y = round(ln * math.sin(self.angle_x * math.pi / 180), 3)
         self.z = round(math.cos(self.angle_z * math.pi / 180) * self.r, 3)
 
     # 将直角坐标系的值同步到球坐标系上
@@ -77,20 +94,19 @@ class Point:
             if not (self.x == 0 and self.y == 0):
                 self.angle_x = math.acos(self.x / math.sqrt(self.x ** 2 + self.y ** 2)) * 180 / math.pi
 
-    # 重写 + 变为两点坐标相加
-    def __add__(self, point):
-        return Point(self.x + point.x, self.y + point.y, self.z + point.z)
+    # 获得x,y,z的模的平方和
+    def modulo_fang(self):
+        return self.x ** 2 + self.y ** 2 + self.z ** 2
 
-    # 重写 - 变为两点坐标相减
-    def __sub__(self, point):
-        return Point(self.x - point.x, self.y - point.y, self.z - point.z)
-
-    # 重写 * 变为求两点点积
-    def __mul__(self, target):
-        if type(target) == Point:
-            return self.x * target.x + self.y * target.y + self.z * target.z
-        elif type(target) == int or type(target) == float:
-            return Point(self.x * target, self.y * target, self.z * target)
+    # 将向量长度缩放到模为1
+    def to_modulo_one(self):
+        module = math.sqrt(self.modulo_fang())
+        if module > 0:
+            self.x /= module
+            self.y /= module
+            self.z /= module
+            self.turn_sphere()
+        return self
 
     # 输出点的坐标
     def __str__(self):
@@ -98,12 +114,20 @@ class Point:
             self.x, self.y, self.z, self.r, self.angle_x, self.angle_z
         )
 
-    def str(self):
-        return self.__str__()
+    # 重写 * 变为求两向量点积
+    def __mul__(self, target):
+        if type(target) == Vector:
+            return self.x * target.x + self.y * target.y + self.z * target.z
+        elif type(target) == int or type(target) == float:
+            return Vector(self.x * target, self.y * target, self.z * target)
 
+    # 重写 + 变为两点坐标相加
+    def __add__(self, vector):
+        return Vector(self.x + vector.x, self.y + vector.y, self.z + vector.z)
 
-class Vector(Point):
-    pass
+    # 重写 - 变为两点坐标相减
+    def __sub__(self, vector):
+        return Vector(self.x - vector.x, self.y - vector.y, self.z - vector.z)
 
 
 class Plane:

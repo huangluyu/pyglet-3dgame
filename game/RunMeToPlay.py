@@ -11,7 +11,7 @@ from engine.control.window import Window
 # 初始化 pyglet 窗口
 window = Window(Set.screen_width, Set.screen_height)
 # 初始化人物位置
-player = Player(BaseEntity.Point(0, 0, 100), BaseEntity.Point(0, 0, 0, 100, 0, 90))
+player = Player(BaseEntity.Point(0, 0, 100), BaseEntity.Vector(0, 0, 0, 100, 0, 90))
 # 初始化世界
 world = World(player)
 # 初始化画布
