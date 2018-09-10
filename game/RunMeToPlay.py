@@ -21,6 +21,13 @@ canvas = Canvas(world, window)
 cube_list = Scene.Scene.load_cube_3x4()
 # 放置实体
 world.put(cube_list)
+#
+# pointA = BaseEntity.Point(-10, 0, 0)
+# pointB = BaseEntity.Point(20, 2, 2)
+# planeVector = BaseEntity.Vector(0, 1, 0)
+# planePoint = BaseEntity.Point(1, 1, 0)
+# print(Canvas.plane_cross_line(planePoint, planeVector, pointA, pointB))
+# print(Canvas.plane_cross_line(planePoint, planeVector, pointB, pointA))
 
 # 设定时钟周期及绘制类
 pyglet.clock.schedule_interval(canvas.tick_draw, Canvas.dt)

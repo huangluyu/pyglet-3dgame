@@ -19,7 +19,7 @@ class Canvas:
     # 画布平面
     plane = None
     # 时刻
-    dt = 1 / 120
+    dt = 1 / 200
 
     # 初始化 设置world（保存实体）和window（显示画面）
     def __init__(self, world, window):
@@ -29,12 +29,15 @@ class Canvas:
 
     # 画一条线
     @staticmethod
-    def draw_line(a, b, ta, tb):
+    def draw_line(a, b, ta, tb, is_visiable):
+        blue = (255, 200, 200, 255, 200, 200)
+        red = (0, 255, 0, 0, 255, 0)
+        white = (255, 255, 255, 255, 255, 255)
         pyglet.graphics.draw(
             2,
             pyglet.gl.GL_LINES,
             ('v2f', (a, b, ta, tb)),
-            ('c3B', (255, 255, 255, 255, 255, 255))
+            ('c3B', blue if is_visiable else red)
         )
 
     # 画一个正方形
@@ -75,18 +78,36 @@ class Canvas:
         )
         return BasicEntity.Plane(player.face_to.x, player.face_to.y, player.face_to.z, d)
 
-    # 计算点在画布上的投影点（世界坐标系）
+    # 计算目标点与玩家的连线与画布面的交叉点（世界坐标系），也是目标点在画布面上的投影点
     def canvas_plane_cross_point(self, target_point):
         player = self.world.player
-        mol = player.face_to.modulo_fang()
-        a = player.face_to.x * (target_point.x - player.location.x) \
-            + player.face_to.y * (target_point.y - player.location.y) \
-            + player.face_to.z * (target_point.z - player.location.z)
-        k = mol / a if a != 0 else 0
-        plane_x = k * (target_point.x - player.location.x) + player.location.x
-        plane_y = k * (target_point.y - player.location.y) + player.location.y
-        plane_z = k * (target_point.z - player.location.z) + player.location.z
-        return BasicEntity.Point(plane_x, plane_y, plane_z)
+        return self.plane_cross_line(player.location + player.face_to, player.face_to, player.location, target_point)
+        # mol = player.face_to.modulo_fang()
+        # a = player.face_to.x * (target_point.x - player.location.x) \
+        #     + player.face_to.y * (target_point.y - player.location.y) \
+        #     + player.face_to.z * (target_point.z - player.location.z)
+        # k = mol / a if a != 0 else 0
+        # plane_x = k * (target_point.x - player.location.x) + player.location.x
+        # plane_y = k * (target_point.y - player.location.y) + player.location.y
+        # plane_z = k * (target_point.z - player.location.z) + player.location.z
+        # return BasicEntity.Point(plane_x, plane_y, plane_z)
+
+    # 计算点和面的交点
+    @staticmethod
+    def plane_cross_line(plane_point, plane_vector, point_a, point_b):
+        mol = (plane_point.x - point_b.x) * plane_vector.x + \
+              (plane_point.y - point_b.y) * plane_vector.y + \
+              (plane_point.z - point_b.z) * plane_vector.z
+        de = plane_vector.x * (point_a.x - point_b.x) + \
+             plane_vector.y * (point_a.y - point_b.y) + \
+             plane_vector.z * (point_a.z - point_b.z)
+        k = mol / de if de != 0 else 0
+        k = k if k > 0 else -k
+        # print("k", k, "x", point_a.x - point_b.x, "y", point_a.y - point_b.y, "z", point_a.z - point_b.z)
+        cross_point_x = k * (point_a.x - point_b.x) + point_b.x
+        cross_point_y = k * (point_a.y - point_b.y) + point_b.y
+        cross_point_z = k * (point_a.z - point_b.z) + point_b.z
+        return BasicEntity.Point(cross_point_x, cross_point_y, cross_point_z)
 
     # 空间点投影到画布上获取只有x，y两个坐标的画布点
     # 参数：空间点坐标，画布坐标系 x 轴方向矢量，y 轴方向矢量，画布原点坐标
@@ -97,7 +118,7 @@ class Canvas:
         y = vector * y_vector
         return BasicEntity.Point(x * 250 / Set.screen_range, y * 250 / Set.screen_range, 0)
 
-    # 获得新的画布矢量
+    # 获得当前朝向下新的画布面（x轴，y轴，及原点）
     def get_new_xy_vector(self):
         player = self.world.player
         canvas_zero = player.location + player.face_to
@@ -125,7 +146,7 @@ class Canvas:
         A = player.face_to.x
         B = player.face_to.y
         C = player.face_to.z
-        return (A * point.x + B * point.y + C * point.z) >\
+        return (A * point.x + B * point.y + C * point.z) > \
                (player.location.x * A + player.location.y * B + player.location.z * C)
 
     # 每个tick时执行该函数绘制画面
@@ -139,6 +160,7 @@ class Canvas:
         # 存储线及点是否可见
         canvas_point_list = []
         canvas_point_visible = []
+        point_list = []
 
         # 屏幕中点
         screen_reset = BasicEntity.Point(
@@ -149,25 +171,59 @@ class Canvas:
 
         # 取出当前世界中的点进行计算，转换到画布坐标系上
         for point in self.world.point_list:
+            # 简化空间点
             space_point = self.canvas_plane_cross_point(point)
+            # 获取画布点（以原点为中心）
             canvas_point = self.space_to_canvas(space_point, x_vector, y_vector, canvas_zero)
+
+            point_list.append(point)
+            # 获取画布点移至视平面中心，并存储至列表中
             canvas_point_list.append(canvas_point + screen_reset)
+            # 判断点是否存在于
             canvas_point_visible.append(self.is_visible(point))
 
         # 清除画布
         self.window.clear()
-        # 重新绘制画布
+        # 重新绘制画布，将点的连线应用至点上
         for line in self.world.line_list:
-            if canvas_point_visible[line[0]] and canvas_point_visible[line[1]]:
-                Canvas.draw_line(
-                    canvas_point_list[line[0]].x, canvas_point_list[line[0]].y,
-                    canvas_point_list[line[1]].x, canvas_point_list[line[1]].y
-                )
-            # elif (canvas_point_visible[line[0]]):
-            #     self.world.point_list[]
-            #     Canvas.draw_line(canvas_point_list[line[0]].x, canvas_point_list[line[0]].y, canvas_point_list[line[1]].x, canvas_point_list[line[1]].y)
-            # elif (canvas_point_visible[line[1]]):
-            #     Canvas.draw_line(canvas_point_list[line[0]].x, canvas_point_list[line[0]].y, canvas_point_list[line[1]].x, canvas_point_list[line[1]].y)
+            # 遍历连线
+            # 如果连线的两端都不可见则直接跳过
+            is_visiable = True
+            if not canvas_point_visible[line[0]] and not canvas_point_visible[line[1]]:
+                continue
+            player = self.world.player
+            point_a = canvas_point_list[line[0]]
+            point_b = canvas_point_list[line[1]]
+            # 单侧不可见的情况下，将其中转换为投影
+            if not canvas_point_visible[line[0]] :
+                is_visiable = False
+                cross_point = self.plane_cross_line(player.location + player.face_to, player.face_to,
+                                                point_list[line[0]], point_list[line[1]])
+
+                canvas_cross_point = self.space_to_canvas(cross_point, x_vector, y_vector, canvas_zero)
+
+                point_a = self.get_final_cross_point(point_b, canvas_cross_point + screen_reset)
+            elif not canvas_point_visible[line[1]]:
+                is_visiable = False
+                cross_point = self.plane_cross_line(player.location + player.face_to, player.face_to,
+                                                point_list[line[0]], point_list[line[1]])
+                canvas_cross_point = self.space_to_canvas(cross_point, x_vector, y_vector, canvas_zero)
+                point_b = self.get_final_cross_point(point_a, canvas_cross_point)
+
+            # 绘制连线
+            Canvas.draw_line(
+                point_a.x, point_a.y,
+                point_b.x, point_b.y,is_visiable
+            )
+            Canvas.draw_line(
+                300, 300,
+                950, 750, True
+            )
+        # elif (canvas_point_visible[line[0]]):
+        #     self.world.point_list[]
+        #     Canvas.draw_line(canvas_point_list[line[0]].x, canvas_point_list[line[0]].y, canvas_point_list[line[1]].x, canvas_point_list[line[1]].y)
+        # elif (canvas_point_visible[line[1]]):
+        #     Canvas.draw_line(canvas_point_list[line[0]].x, canvas_point_list[line[0]].y, canvas_point_list[line[1]].x, canvas_point_list[line[1]].y)
 
     # label = pyglet.text.Label('去你妈的祖国的花朵',
     #                           font_name = 'Times New Roman',
@@ -178,3 +234,40 @@ class Canvas:
     #                          ('v2i', (10, 15, 30, 35)),
     #                          ('c3B', (0, 0, 255, 0, 255, 0))
     #                          )
+
+    def get_final_cross_point(self, point_start, point_cross):
+        if (point_cross.x > Set.screen_width or point_cross.x < 0) and (point_cross.y > Set.screen_height or point_cross.y < 0):
+            return point_cross
+        k = self.get_line_k(point_cross, point_start)
+        k1 = self.get_line_k(BasicEntity.Point(Set.screen_width, Set.screen_height, 0), point_start)
+        k2 = self.get_line_k(BasicEntity.Point(0, Set.screen_height, 0), point_start)
+        k3 = self.get_line_k(BasicEntity.Point(0, 0, 0), point_start)
+        k4 = self.get_line_k(BasicEntity.Point(Set.screen_width, 0, 0), point_start)
+        point1 = BasicEntity.Point((Set.screen_height - point_start.y) / k, Set.screen_height, 0)
+        point2 = BasicEntity.Point(-Set.screen_width, (Set.screen_width - point_start.x) / k, 0)
+        point3 = BasicEntity.Point((Set.screen_height - point_start.y) / k, -Set.screen_height, 0)
+        point4 = BasicEntity.Point(Set.screen_width, (Set.screen_width - point_start.x) / k, 0)
+        if point_cross.x >= point_start.x and point_cross.y >= point_start.y:
+            if k >= k1:
+                return point1
+            else:
+                return point4
+        if point_cross.x < point_start.x and point_cross.y >= point_start.y:
+            if k >= k2:
+                return point1
+            else:
+                return point2
+        if point_cross.x < point_start.x and point_cross.y < point_start.y:
+            if k >= k3:
+                return point3
+            else:
+                return point2
+        if point_cross.x >= point_start.x and point_cross.y < point_start.y:
+            if k >= k4:
+                return point3
+            else:
+                return point4
+
+    @staticmethod
+    def get_line_k(pointA, pointB):
+        return (pointA.y - pointB.y) / (pointA.x - pointB.x)
