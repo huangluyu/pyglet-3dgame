@@ -194,6 +194,13 @@ class Canvas:
             player = self.world.player
             point_a = canvas_point_list[line[0]]
             point_b = canvas_point_list[line[1]]
+            print(point_a, point_b)
+            if self.is_out_screen(point_a) and self.is_out_screen(point_b):
+                continue
+            elif self.is_out_screen(point_a) and not canvas_point_visible[line[1]]:
+                continue
+            elif self.is_out_screen(point_b) and not canvas_point_visible[line[0]]:
+                continue
             # 单侧不可见的情况下，将其中转换为投影
             if not canvas_point_visible[line[0]] :
                 is_visible = False
@@ -242,8 +249,9 @@ class Canvas:
     #                          ('c3B', (0, 0, 255, 0, 255, 0))
     #                          )
 
+    # 获得画布平面上两点的延长线与画布框的交点
     def get_final_cross_point(self, point_start, point_cross):
-        print("point_start", point_start, "point_cross", point_cross)
+        # print("point_start", point_start, "point_cross", point_cross)
         if (point_cross.x > Set.screen_width or point_cross.x < 0) and (point_cross.y > Set.screen_height or point_cross.y < 0):
             return point_cross
         k = self.get_line_k(point_cross, point_start)
@@ -253,15 +261,16 @@ class Canvas:
         k4 = self.get_line_k(BasicEntity.Point(Set.screen_width, 0, 0), point_start)
         if k == 0:
             k = 0.001
+        # 与画布平面上四条边的四个交点
         point1 = BasicEntity.Point((Set.screen_height - point_start.y) / k + point_start.x, Set.screen_height, 0)
         point2 = BasicEntity.Point(0, - point_start.x * k + point_start.y, 0)
         point3 = BasicEntity.Point(- point_start.y / k + point_start.x, 0, 0)
         point4 = BasicEntity.Point(Set.screen_width, (Set.screen_width - point_start.x) * k + point_start.y, 0)
-        print("point1", point1, k1)
-        print("point2", point2, k2)
-        print("point3", point3, k3)
-        print("point4", point4, k4)
-        print("k", k)
+        # print("point1", point1, k1)
+        # print("point2", point2, k2)
+        # print("point3", point3, k3)
+        # print("point4", point4, k4)
+        # print("k", k)
         if point_cross.x >= point_start.x and point_cross.y >= point_start.y:
             if k >= k1:
                 return point1
@@ -288,3 +297,7 @@ class Canvas:
         if pointA.x - pointB.x == 0:
             return (pointA.y - pointB.y) * 1000
         return (pointA.y - pointB.y) / (pointA.x - pointB.x)
+
+    @staticmethod
+    def is_out_screen(point):
+        return point.x < 0 or point.x > Set.screen_width or point.y < 0 or point.y >= Set.screen_height

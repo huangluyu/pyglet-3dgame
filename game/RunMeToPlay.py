@@ -18,7 +18,7 @@ world = World(player)
 canvas = Canvas(world, window)
 
 # 初始化实体
-cube_list = Scene.load_squarez()
+cube_list = Scene.load_cube_3x4()
 # 放置实体
 world.put(cube_list)
 
