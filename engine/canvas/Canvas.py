@@ -102,7 +102,7 @@ class Canvas:
              plane_vector.y * (point_a.y - point_b.y) + \
              plane_vector.z * (point_a.z - point_b.z)
         k = mol / de if de != 0 else 0
-        k = k if k > 0 else -k
+        # k = k if k > 0 else -k
         # print("k", k, "x", point_a.x - point_b.x, "y", point_a.y - point_b.y, "z", point_a.z - point_b.z)
         cross_point_x = k * (point_a.x - point_b.x) + point_b.x
         cross_point_y = k * (point_a.y - point_b.y) + point_b.y
@@ -175,7 +175,7 @@ class Canvas:
             space_point = self.canvas_plane_cross_point(point)
             # 获取画布点（以原点为中心）
             canvas_point = self.space_to_canvas(space_point, x_vector, y_vector, canvas_zero)
-
+            # print("point", point, "space_point", space_point, "canvas_point", canvas_point)
             point_list.append(point)
             # 获取画布点移至视平面中心，并存储至列表中
             canvas_point_list.append(canvas_point + screen_reset)
@@ -188,7 +188,7 @@ class Canvas:
         for line in self.world.line_list:
             # 遍历连线
             # 如果连线的两端都不可见则直接跳过
-            is_visiable = True
+            is_visible = True
             if not canvas_point_visible[line[0]] and not canvas_point_visible[line[1]]:
                 continue
             player = self.world.player
@@ -196,29 +196,36 @@ class Canvas:
             point_b = canvas_point_list[line[1]]
             # 单侧不可见的情况下，将其中转换为投影
             if not canvas_point_visible[line[0]] :
-                is_visiable = False
+                is_visible = False
                 cross_point = self.plane_cross_line(player.location + player.face_to, player.face_to,
                                                 point_list[line[0]], point_list[line[1]])
 
                 canvas_cross_point = self.space_to_canvas(cross_point, x_vector, y_vector, canvas_zero)
 
                 point_a = self.get_final_cross_point(point_b, canvas_cross_point + screen_reset)
+                print("cross_point", cross_point, "canvas_cross_point", canvas_cross_point, "point_a", point_a)
             elif not canvas_point_visible[line[1]]:
-                is_visiable = False
+                is_visible = False
                 cross_point = self.plane_cross_line(player.location + player.face_to, player.face_to,
                                                 point_list[line[0]], point_list[line[1]])
                 canvas_cross_point = self.space_to_canvas(cross_point, x_vector, y_vector, canvas_zero)
-                point_b = self.get_final_cross_point(point_a, canvas_cross_point)
-
+                point_b = self.get_final_cross_point(point_a, canvas_cross_point + screen_reset)
+                print("cross_point", cross_point, "canvas_cross_point", canvas_cross_point, "point_b", point_b)
+            # print("point_a", point_a, "point_b", point_b)
             # 绘制连线
             Canvas.draw_line(
                 point_a.x, point_a.y,
-                point_b.x, point_b.y,is_visiable
+                point_b.x, point_b.y, is_visible
             )
-            Canvas.draw_line(
-                300, 300,
-                950, 750, True
-            )
+        # point_a = BasicEntity.Point(700, 550, 0)
+        # point_b = BasicEntity.Point(600, 500, 0)
+        # cross_point = self.get_final_cross_point(point_b, point_a)
+        # print("cross_point", cross_point)
+        # Canvas.draw_line(
+        #     point_b.x, point_b.y,
+        #     cross_point.x, cross_point.y, True
+        # )
+
         # elif (canvas_point_visible[line[0]]):
         #     self.world.point_list[]
         #     Canvas.draw_line(canvas_point_list[line[0]].x, canvas_point_list[line[0]].y, canvas_point_list[line[1]].x, canvas_point_list[line[1]].y)
@@ -236,6 +243,7 @@ class Canvas:
     #                          )
 
     def get_final_cross_point(self, point_start, point_cross):
+        print("point_start", point_start, "point_cross", point_cross)
         if (point_cross.x > Set.screen_width or point_cross.x < 0) and (point_cross.y > Set.screen_height or point_cross.y < 0):
             return point_cross
         k = self.get_line_k(point_cross, point_start)
@@ -243,10 +251,17 @@ class Canvas:
         k2 = self.get_line_k(BasicEntity.Point(0, Set.screen_height, 0), point_start)
         k3 = self.get_line_k(BasicEntity.Point(0, 0, 0), point_start)
         k4 = self.get_line_k(BasicEntity.Point(Set.screen_width, 0, 0), point_start)
-        point1 = BasicEntity.Point((Set.screen_height - point_start.y) / k, Set.screen_height, 0)
-        point2 = BasicEntity.Point(-Set.screen_width, (Set.screen_width - point_start.x) / k, 0)
-        point3 = BasicEntity.Point((Set.screen_height - point_start.y) / k, -Set.screen_height, 0)
-        point4 = BasicEntity.Point(Set.screen_width, (Set.screen_width - point_start.x) / k, 0)
+        if k == 0:
+            k = 0.001
+        point1 = BasicEntity.Point((Set.screen_height - point_start.y) / k + point_start.x, Set.screen_height, 0)
+        point2 = BasicEntity.Point(0, - point_start.x * k + point_start.y, 0)
+        point3 = BasicEntity.Point(- point_start.y / k + point_start.x, 0, 0)
+        point4 = BasicEntity.Point(Set.screen_width, (Set.screen_width - point_start.x) * k + point_start.y, 0)
+        print("point1", point1, k1)
+        print("point2", point2, k2)
+        print("point3", point3, k3)
+        print("point4", point4, k4)
+        print("k", k)
         if point_cross.x >= point_start.x and point_cross.y >= point_start.y:
             if k >= k1:
                 return point1
@@ -254,9 +269,9 @@ class Canvas:
                 return point4
         if point_cross.x < point_start.x and point_cross.y >= point_start.y:
             if k >= k2:
-                return point1
-            else:
                 return point2
+            else:
+                return point1
         if point_cross.x < point_start.x and point_cross.y < point_start.y:
             if k >= k3:
                 return point3
@@ -264,10 +279,12 @@ class Canvas:
                 return point2
         if point_cross.x >= point_start.x and point_cross.y < point_start.y:
             if k >= k4:
-                return point3
-            else:
                 return point4
+            else:
+                return point3
 
     @staticmethod
     def get_line_k(pointA, pointB):
+        if pointA.x - pointB.x == 0:
+            return (pointA.y - pointB.y) * 1000
         return (pointA.y - pointB.y) / (pointA.x - pointB.x)
