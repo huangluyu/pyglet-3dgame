@@ -23,7 +23,6 @@ cube_list = Scene.load_square()
 # 放置实体
 world.put(cube_list)
 
-#
 # pointA = BaseEntity.Point(-10, 0, 0)
 # pointB = BaseEntity.Point(20, 2, 2)
 # planeVector = BaseEntity.Vector(0, 1, 0)
