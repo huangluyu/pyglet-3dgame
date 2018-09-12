@@ -19,7 +19,7 @@ class Scene:
             StaticBasicEntity.Cube(BasicEntity.Point(0, 600, 200), 200),
             StaticBasicEntity.Cube(BasicEntity.Point(0, 600, 400), 200),
             StaticBasicEntity.Cube(BasicEntity.Point(0, 600, 600), 200),
-            StaticBasicEntity.Cube(BasicEntity.Point(0, 600, 800), 100),
+            StaticBasicEntity.Cube(BasicEntity.Point(0, 600, 800), 200),
         ]
         return cube_list
 
@@ -28,8 +28,8 @@ class Scene:
         a = BasicEntity.BasicEntity()
         a.link_list = [[0, 1]]
         a.point_list = [
-            BasicEntity.Point(1, 100, 0),
-            BasicEntity.Point(-100, -100, 0)
+            BasicEntity.Point(100, 0, 0),
+            BasicEntity.Point(-100, -100, 200)
         ]
         return [
             a

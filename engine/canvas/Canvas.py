@@ -195,28 +195,29 @@ class Canvas:
             point_a = canvas_point_list[line[0]]
             point_b = canvas_point_list[line[1]]
             print(point_a, point_b)
-            if self.is_out_screen(point_a) and self.is_out_screen(point_b):
-                continue
-            elif self.is_out_screen(point_a) and not canvas_point_visible[line[1]]:
+            # 判断是否应该隐藏，如果一个点在视野外，一个点在后脑勺就隐藏
+            # TODO 判断标准应比这更复杂
+            if self.is_out_screen(point_a) and not canvas_point_visible[line[1]]:
                 continue
             elif self.is_out_screen(point_b) and not canvas_point_visible[line[0]]:
                 continue
             # 单侧不可见的情况下，将其中转换为投影
-            if not canvas_point_visible[line[0]] :
+            if not canvas_point_visible[line[0]]:
                 is_visible = False
                 cross_point = self.plane_cross_line(player.location + player.face_to, player.face_to,
-                                                point_list[line[0]], point_list[line[1]])
-
+                                                    point_list[line[0]], point_list[line[1]])
+                is_not_among_point = self.is_not_among_point(point_list[line[0]], point_list[line[1]], cross_point)
                 canvas_cross_point = self.space_to_canvas(cross_point, x_vector, y_vector, canvas_zero)
 
-                point_a = self.get_final_cross_point(point_b, canvas_cross_point + screen_reset)
+                point_a = self.get_final_cross_point(point_b, canvas_cross_point + screen_reset, is_not_among_point)
                 print("cross_point", cross_point, "canvas_cross_point", canvas_cross_point, "point_a", point_a)
             elif not canvas_point_visible[line[1]]:
                 is_visible = False
                 cross_point = self.plane_cross_line(player.location + player.face_to, player.face_to,
-                                                point_list[line[0]], point_list[line[1]])
+                                                    point_list[line[0]], point_list[line[1]])
+                is_not_among_point = self.is_not_among_point(point_list[line[0]], point_list[line[1]], cross_point)
                 canvas_cross_point = self.space_to_canvas(cross_point, x_vector, y_vector, canvas_zero)
-                point_b = self.get_final_cross_point(point_a, canvas_cross_point + screen_reset)
+                point_b = self.get_final_cross_point(point_a, canvas_cross_point + screen_reset, is_not_among_point)
                 print("cross_point", cross_point, "canvas_cross_point", canvas_cross_point, "point_b", point_b)
             # print("point_a", point_a, "point_b", point_b)
             # 绘制连线
@@ -250,9 +251,10 @@ class Canvas:
     #                          )
 
     # 获得画布平面上两点的延长线与画布框的交点
-    def get_final_cross_point(self, point_start, point_cross):
+    def get_final_cross_point(self, point_start, point_cross, is_not_among_point):
         # print("point_start", point_start, "point_cross", point_cross)
-        if (point_cross.x > Set.screen_width or point_cross.x < 0) and (point_cross.y > Set.screen_height or point_cross.y < 0):
+        if (point_cross.x > Set.screen_width or point_cross.x < 0) and (
+                point_cross.y > Set.screen_height or point_cross.y < 0):
             return point_cross
         k = self.get_line_k(point_cross, point_start)
         k1 = self.get_line_k(BasicEntity.Point(Set.screen_width, Set.screen_height, 0), point_start)
@@ -271,33 +273,59 @@ class Canvas:
         # print("point3", point3, k3)
         # print("point4", point4, k4)
         # print("k", k)
+        point = None
         if point_cross.x >= point_start.x and point_cross.y >= point_start.y:
             if k >= k1:
-                return point1
+                point = point1
             else:
-                return point4
-        if point_cross.x < point_start.x and point_cross.y >= point_start.y:
+                point = point4
+        elif point_cross.x < point_start.x and point_cross.y >= point_start.y:
             if k >= k2:
-                return point2
+                point = point2
             else:
-                return point1
-        if point_cross.x < point_start.x and point_cross.y < point_start.y:
+                point = point1
+        elif point_cross.x < point_start.x and point_cross.y < point_start.y:
             if k >= k3:
-                return point3
+                point = point3
             else:
-                return point2
-        if point_cross.x >= point_start.x and point_cross.y < point_start.y:
+                point = point2
+        elif point_cross.x >= point_start.x and point_cross.y < point_start.y:
             if k >= k4:
-                return point4
+                point = point4
             else:
+                point = point3
+        if is_not_among_point:
+            if point == point1:
                 return point3
+            if point == point2:
+                return point4
+            if point == point3:
+                return point1
+            if point == point4:
+                return point2
+        return point
 
+    # 获取两点连线的 K 值（x, y方向上）
     @staticmethod
-    def get_line_k(pointA, pointB):
-        if pointA.x - pointB.x == 0:
-            return (pointA.y - pointB.y) * 1000
-        return (pointA.y - pointB.y) / (pointA.x - pointB.x)
+    def get_line_k(point_a, point_b):
+        if point_a.x - point_b.x == 0:
+            return (point_a.y - point_b.y) * 1000
+        return (point_a.y - point_b.y) / (point_a.x - point_b.x)
 
+    # 判断点是否在屏幕外面（超出画布面视野范围）
     @staticmethod
     def is_out_screen(point):
         return point.x < 0 or point.x > Set.screen_width or point.y < 0 or point.y >= Set.screen_height
+
+    # 判断一条直线上某点是否在两个点中间
+    @staticmethod
+    def is_not_among_point(point_a, point_b, point_check):
+        if point_check.x != point_a.x:
+            return (point_check.x > point_a.x and point_check.x > point_b.x) \
+                   or (point_check.x < point_a.x and point_check.x < point_b.x)
+        elif point_check.y != point_a.y:
+            return (point_check.y > point_a.y and point_check.y > point_b.y) \
+                   or (point_check.y < point_a.y and point_check.y < point_b.y)
+        elif point_check.z != point_a.z:
+            return (point_check.z > point_a.z and point_check.z > point_b.z) \
+                   or (point_check.z < point_a.z and point_check.z < point_b.z)
