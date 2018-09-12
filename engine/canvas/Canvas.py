@@ -1,12 +1,11 @@
 import math
 import pyglet
 
-from engine.entity.base import BasicEntity
+from engine.entity.base import Space
 
 # 画布类
 from engine.config import Set
 from engine.control.InputControl import InputControl
-from engine.entity.World import World
 
 
 class Canvas:
@@ -76,7 +75,7 @@ class Canvas:
                 + player.face_to.z * player.location.y
                 + math.sqrt(player.face_to.modulo_fang())
         )
-        return BasicEntity.Plane(player.face_to.x, player.face_to.y, player.face_to.z, d)
+        return Space.Plane(player.face_to.x, player.face_to.y, player.face_to.z, d)
 
     # 计算目标点与玩家的连线与画布面的交叉点（世界坐标系），也是目标点在画布面上的投影点
     def canvas_plane_cross_point(self, target_point):
@@ -107,7 +106,7 @@ class Canvas:
         cross_point_x = k * (point_a.x - point_b.x) + point_b.x
         cross_point_y = k * (point_a.y - point_b.y) + point_b.y
         cross_point_z = k * (point_a.z - point_b.z) + point_b.z
-        return BasicEntity.Point(cross_point_x, cross_point_y, cross_point_z)
+        return Space.Point(cross_point_x, cross_point_y, cross_point_z)
 
     # 空间点投影到画布上获取只有x，y两个坐标的画布点
     # 参数：空间点坐标，画布坐标系 x 轴方向矢量，y 轴方向矢量，画布原点坐标
@@ -116,18 +115,18 @@ class Canvas:
         vector = space_point - canvas_zero
         x = vector * x_vector
         y = vector * y_vector
-        return BasicEntity.Point(x * 250 / Set.screen_range, y * 250 / Set.screen_range, 0)
+        return Space.CanvasPoint(x * 250 / Set.screen_range, y * 250 / Set.screen_range)
 
     # 获得当前朝向下新的画布面（x轴，y轴，及原点）
     def get_new_xy_vector(self):
         player = self.world.player
         canvas_zero = player.location + player.face_to
-        x_vector = BasicEntity.Vector(
+        x_vector = Space.Vector(
             player.face_to.y,
             - player.face_to.x,
             0
         ).to_modulo_one()
-        y_vector = BasicEntity.Vector(
+        y_vector = Space.Vector(
             - player.face_to.z * player.face_to.x,
             - player.face_to.z * player.face_to.y,
             player.face_to.y ** 2 + player.face_to.x ** 2
@@ -163,10 +162,9 @@ class Canvas:
         point_list = []
 
         # 屏幕中点
-        screen_reset = BasicEntity.Point(
+        screen_reset = Space.CanvasPoint(
             Set.screen_width / 2,
-            Set.screen_height / 2,
-            0
+            Set.screen_height / 2
         )
 
         # 取出当前世界中的点进行计算，转换到画布坐标系上
@@ -197,9 +195,9 @@ class Canvas:
             print(point_a, point_b)
             # 判断是否应该隐藏，如果一个点在视野外，一个点在后脑勺就隐藏
             # TODO 判断标准应比这更复杂
-            if self.is_out_screen(point_a) and not canvas_point_visible[line[1]]:
+            if point_a.is_out_screen() and not canvas_point_visible[line[1]]:
                 continue
-            elif self.is_out_screen(point_b) and not canvas_point_visible[line[0]]:
+            elif point_b.is_out_screen() and not canvas_point_visible[line[0]]:
                 continue
             # 单侧不可见的情况下，将其中转换为投影
             if not canvas_point_visible[line[0]]:
@@ -253,21 +251,21 @@ class Canvas:
     # 获得画布平面上两点的延长线与画布框的交点
     def get_final_cross_point(self, point_start, point_cross, is_not_among_point):
         # print("point_start", point_start, "point_cross", point_cross)
-        if (point_cross.x > Set.screen_width or point_cross.x < 0) and (
-                point_cross.y > Set.screen_height or point_cross.y < 0):
+        if (point_cross.x > Set.screen_width or point_cross.x < 0) and \
+                (point_cross.y > Set.screen_height or point_cross.y < 0):
             return point_cross
         k = self.get_line_k(point_cross, point_start)
-        k1 = self.get_line_k(BasicEntity.Point(Set.screen_width, Set.screen_height, 0), point_start)
-        k2 = self.get_line_k(BasicEntity.Point(0, Set.screen_height, 0), point_start)
-        k3 = self.get_line_k(BasicEntity.Point(0, 0, 0), point_start)
-        k4 = self.get_line_k(BasicEntity.Point(Set.screen_width, 0, 0), point_start)
+        k1 = self.get_line_k(Space.Point(Set.screen_width, Set.screen_height, 0), point_start)
+        k2 = self.get_line_k(Space.Point(0, Set.screen_height, 0), point_start)
+        k3 = self.get_line_k(Space.Point(0, 0, 0), point_start)
+        k4 = self.get_line_k(Space.Point(Set.screen_width, 0, 0), point_start)
         if k == 0:
             k = 0.001
         # 与画布平面上四条边的四个交点
-        point1 = BasicEntity.Point((Set.screen_height - point_start.y) / k + point_start.x, Set.screen_height, 0)
-        point2 = BasicEntity.Point(0, - point_start.x * k + point_start.y, 0)
-        point3 = BasicEntity.Point(- point_start.y / k + point_start.x, 0, 0)
-        point4 = BasicEntity.Point(Set.screen_width, (Set.screen_width - point_start.x) * k + point_start.y, 0)
+        point1 = Space.Point((Set.screen_height - point_start.y) / k + point_start.x, Set.screen_height, 0)
+        point2 = Space.Point(0, - point_start.x * k + point_start.y, 0)
+        point3 = Space.Point(- point_start.y / k + point_start.x, 0, 0)
+        point4 = Space.Point(Set.screen_width, (Set.screen_width - point_start.x) * k + point_start.y, 0)
         # print("point1", point1, k1)
         # print("point2", point2, k2)
         # print("point3", point3, k3)
@@ -311,11 +309,6 @@ class Canvas:
         if point_a.x - point_b.x == 0:
             return (point_a.y - point_b.y) * 1000
         return (point_a.y - point_b.y) / (point_a.x - point_b.x)
-
-    # 判断点是否在屏幕外面（超出画布面视野范围）
-    @staticmethod
-    def is_out_screen(point):
-        return point.x < 0 or point.x > Set.screen_width or point.y < 0 or point.y >= Set.screen_height
 
     # 判断一条直线上某点是否在两个点中间
     @staticmethod
