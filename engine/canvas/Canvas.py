@@ -18,7 +18,9 @@ class Canvas:
     # 画布平面
     plane = None
     # 时刻
-    dt = 1 / 200
+    dt = 1 / 500
+    #
+    time = 0
 
     # 初始化 设置world（保存实体）和window（显示画面）
     def __init__(self, world, window):
@@ -180,6 +182,10 @@ class Canvas:
             # 判断点是否存在于
             canvas_point_visible.append(self.is_visible(point))
 
+        # print("pointlist", point_list)
+        # print("canvas_point_list", canvas_point_list)
+        # print("canvas_point_visible", canvas_point_visible)
+
         # 清除画布
         self.window.clear()
         # 重新绘制画布，将点的连线应用至点上
@@ -192,13 +198,13 @@ class Canvas:
             player = self.world.player
             point_a = canvas_point_list[line[0]]
             point_b = canvas_point_list[line[1]]
-            print(point_a, point_b)
+            # print("point_origin_a", point_a, "point_origin_b", point_b)
             # 判断是否应该隐藏，如果一个点在视野外，一个点在后脑勺就隐藏
             # TODO 判断标准应比这更复杂
-            if point_a.is_out_screen() and not canvas_point_visible[line[1]]:
-                continue
-            elif point_b.is_out_screen() and not canvas_point_visible[line[0]]:
-                continue
+            # if point_a.is_out_screen() and not canvas_point_visible[line[1]]:
+            #     continue
+            # elif point_b.is_out_screen() and not canvas_point_visible[line[0]]:
+            #     continue
             # 单侧不可见的情况下，将其中转换为投影
             if not canvas_point_visible[line[0]]:
                 is_visible = False
@@ -208,7 +214,7 @@ class Canvas:
                 canvas_cross_point = self.space_to_canvas(cross_point, x_vector, y_vector, canvas_zero)
 
                 point_a = self.get_final_cross_point(point_b, canvas_cross_point + screen_reset, is_not_among_point)
-                print("cross_point", cross_point, "canvas_cross_point", canvas_cross_point, "point_a", point_a)
+                # print("cross_point", cross_point, "canvas_cross_point", canvas_cross_point, "point_a", point_a)
             elif not canvas_point_visible[line[1]]:
                 is_visible = False
                 cross_point = self.plane_cross_line(player.location + player.face_to, player.face_to,
@@ -216,13 +222,19 @@ class Canvas:
                 is_not_among_point = self.is_not_among_point(point_list[line[0]], point_list[line[1]], cross_point)
                 canvas_cross_point = self.space_to_canvas(cross_point, x_vector, y_vector, canvas_zero)
                 point_b = self.get_final_cross_point(point_a, canvas_cross_point + screen_reset, is_not_among_point)
-                print("cross_point", cross_point, "canvas_cross_point", canvas_cross_point, "point_b", point_b)
+                # print("cross_point", cross_point, "canvas_cross_point", canvas_cross_point, "\npoint_b", point_b)
             # print("point_a", point_a, "point_b", point_b)
             # 绘制连线
             Canvas.draw_line(
                 point_a.x, point_a.y,
                 point_b.x, point_b.y, is_visible
             )
+        Canvas.time += 1
+        pyglet.text.Label('FPS:%d' % Canvas.fps,
+                          font_name='Times New Roman',
+                          font_size=15,
+                          x=30, y=Set.screen_height - 10,
+                          anchor_x='center', anchor_y='center').draw()
         # point_a = BasicEntity.Point(700, 550, 0)
         # point_b = BasicEntity.Point(600, 500, 0)
         # cross_point = self.get_final_cross_point(point_b, point_a)
@@ -239,10 +251,11 @@ class Canvas:
         #     Canvas.draw_line(canvas_point_list[line[0]].x, canvas_point_list[line[0]].y, canvas_point_list[line[1]].x, canvas_point_list[line[1]].y)
 
     # label = pyglet.text.Label('去你妈的祖国的花朵',
-    #                           font_name = 'Times New Roman',
-    #                           font_size = 36,
-    #                           x = window.width//2, y = window.height//2,
-    #                           anchor_x = 'center', anchor_y = 'center')
+    #                           font_name='Times New Roman',
+    #                           font_size=36,
+    #                           x=Set.screen_width, y=Set.screen_height,
+    #                           anchor_x='center', anchor_y='center')
+
     # player_ship = pyglet.graphics.draw(2, pyglet.gl.GL_POINTS,
     #                          ('v2i', (10, 15, 30, 35)),
     #                          ('c3B', (0, 0, 255, 0, 255, 0))
@@ -251,21 +264,21 @@ class Canvas:
     # 获得画布平面上两点的延长线与画布框的交点
     def get_final_cross_point(self, point_start, point_cross, is_not_among_point):
         # print("point_start", point_start, "point_cross", point_cross)
-        if (point_cross.x > Set.screen_width or point_cross.x < 0) and \
-                (point_cross.y > Set.screen_height or point_cross.y < 0):
-            return point_cross
+        # if (point_cross.x > Set.screen_width or point_cross.x < 0) and \
+        #         (point_cross.y > Set.screen_height or point_cross.y < 0):
+        #     return point_cross
         k = self.get_line_k(point_cross, point_start)
-        k1 = self.get_line_k(Space.Point(Set.screen_width, Set.screen_height, 0), point_start)
-        k2 = self.get_line_k(Space.Point(0, Set.screen_height, 0), point_start)
-        k3 = self.get_line_k(Space.Point(0, 0, 0), point_start)
-        k4 = self.get_line_k(Space.Point(Set.screen_width, 0, 0), point_start)
+        k1 = self.get_line_k(Space.CanvasPoint(Set.screen_width, Set.screen_height), point_start)
+        k2 = self.get_line_k(Space.CanvasPoint(0, Set.screen_height), point_start)
+        k3 = self.get_line_k(Space.CanvasPoint(0, 0), point_start)
+        k4 = self.get_line_k(Space.CanvasPoint(Set.screen_width, 0), point_start)
         if k == 0:
             k = 0.001
         # 与画布平面上四条边的四个交点
-        point1 = Space.Point((Set.screen_height - point_start.y) / k + point_start.x, Set.screen_height, 0)
-        point2 = Space.Point(0, - point_start.x * k + point_start.y, 0)
-        point3 = Space.Point(- point_start.y / k + point_start.x, 0, 0)
-        point4 = Space.Point(Set.screen_width, (Set.screen_width - point_start.x) * k + point_start.y, 0)
+        point1 = Space.CanvasPoint((Set.screen_height - point_start.y) / k + point_start.x, Set.screen_height)
+        point2 = Space.CanvasPoint(0, - point_start.x * k + point_start.y)
+        point3 = Space.CanvasPoint(- point_start.y / k + point_start.x, 0)
+        point4 = Space.CanvasPoint(Set.screen_width, (Set.screen_width - point_start.x) * k + point_start.y)
         # print("point1", point1, k1)
         # print("point2", point2, k2)
         # print("point3", point3, k3)
@@ -303,12 +316,12 @@ class Canvas:
                 return point2
         return point
 
-    # 获取两点连线的 K 值（x, y方向上）
+    # 获取两2D点连线的 K 值
     @staticmethod
-    def get_line_k(point_a, point_b):
-        if point_a.x - point_b.x == 0:
-            return (point_a.y - point_b.y) * 1000
-        return (point_a.y - point_b.y) / (point_a.x - point_b.x)
+    def get_line_k(canvas_point_a, canvas_point_b):
+        if canvas_point_a.x - canvas_point_b.x == 0:
+            return (canvas_point_a.y - canvas_point_b.y) * 1000
+        return (canvas_point_a.y - canvas_point_b.y) / (canvas_point_a.x - canvas_point_b.x)
 
     # 判断一条直线上某点是否在两个点中间
     @staticmethod

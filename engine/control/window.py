@@ -32,7 +32,6 @@ class Window(pyglet.window.Window):
             InputControl.keyMap['c'] = True
         if symbol == key.LSHIFT:
             InputControl.keyMap['shift'] = True
-        print("按下")
 
     def on_key_release(self, symbol, modifiers):
         if symbol == key.W:
@@ -49,4 +48,3 @@ class Window(pyglet.window.Window):
             InputControl.keyMap['c'] = False
         if symbol == key.LSHIFT:
             InputControl.keyMap['shift'] = False
-        print("松开")

@@ -1,4 +1,4 @@
-import pyglet
+import pyglet, threading
 
 import engine.entity.base.BasicEntity as BaseEntity
 import engine.entity.base.Space
@@ -19,7 +19,7 @@ world = World(player)
 canvas = Canvas(world, window)
 
 # 初始化实体
-cube_list = Scene.load_square()
+cube_list = Scene.load_cube_3x4()
 # 放置实体
 world.put(cube_list)
 
@@ -30,7 +30,20 @@ world.put(cube_list)
 # print(Canvas.plane_cross_line(planePoint, planeVector, pointA, pointB))
 # print(Canvas.plane_cross_line(planePoint, planeVector, pointB, pointA))
 
+
+def time():
+    dt = 0.5
+    Canvas.fps = Canvas.time / dt
+    Canvas.time = 0
+    threading.Timer(dt, time).start()
+
+
+time()
+
+
 # 设定时钟周期及绘制类
 pyglet.clock.schedule_interval(canvas.tick_draw, Canvas.dt)
 # 开始运行 pyglet
 pyglet.app.run()
+
+

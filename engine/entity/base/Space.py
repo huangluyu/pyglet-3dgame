@@ -22,6 +22,15 @@ class CanvasPoint:
     def __add__(self, point):
         return CanvasPoint(self.x + point.x, self.y + point.y)
 
+    # 输出点的坐标
+    def __str__(self):
+        return '2D点的坐标为: %.3f, %.3f' % (
+            self.x, self.y
+        )
+
+    def __repr__(self):
+        return self.__str__()
+
 
 # 点 或者 向量
 class Point(CanvasPoint):
@@ -59,12 +68,9 @@ class Point(CanvasPoint):
 
     # 输出点的坐标
     def __str__(self):
-        return '点的坐标为: %.3f, %.3f, %.3f' % (
+        return '3D点的坐标为: %.3f, %.3f, %.3f' % (
             self.x, self.y, self.z
         )
-
-    def __repr__(self):
-        return self.__str__()
 
 
 class Vector(Point):
@@ -119,7 +125,7 @@ class Vector(Point):
 
     # 输出点的坐标
     def __str__(self):
-        return '点的坐标为: %.3f, %.3f, %.3f 长度为%.3f 横轴%.3f度 纵轴%.3f度' % (
+        return '向量中点坐标为: %.3f, %.3f, %.3f 长度为%.3f 横轴%.3f度 纵轴%.3f度' % (
             self.x, self.y, self.z, self.r, self.angle_x, self.angle_z
         )
 
