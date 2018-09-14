@@ -154,6 +154,8 @@ class Canvas:
     def tick_draw(self, dt):
         # 移动人物
         InputControl.player_move(dt)
+        # 移动实体
+        self.world.update(dt)
 
         self.plane = self.canvas_plane()
         x_vector, y_vector, canvas_zero = self.get_new_xy_vector()

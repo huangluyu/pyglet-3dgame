@@ -3,6 +3,7 @@ import pyglet, threading
 import engine.entity.base.BasicEntity as BaseEntity
 import engine.entity.base.Space
 from engine.config import Set
+from engine.entity.base.DynamicEntity import MoveCube
 from engine.entity.dynamic.Player import Player
 from engine.entity.World import World
 from engine.canvas.Canvas import Canvas
@@ -22,6 +23,8 @@ canvas = Canvas(world, window)
 cube_list = Scene.load_cube_3x4()
 # 放置实体
 world.put(cube_list)
+
+world.put(MoveCube(engine.entity.base.Space.Point(100, 0, 0), engine.entity.base.Space.Vector(0, 0, 0, 100, 0, 90)))
 
 # pointA = BaseEntity.Point(-10, 0, 0)
 # pointB = BaseEntity.Point(20, 2, 2)

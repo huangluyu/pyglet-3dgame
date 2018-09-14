@@ -31,6 +31,9 @@ class CanvasPoint:
     def __repr__(self):
         return self.__str__()
 
+    def __radd__(self, other):
+        return self + other
+
 
 # 点 或者 向量
 class Point(CanvasPoint):
@@ -71,6 +74,13 @@ class Point(CanvasPoint):
         return '3D点的坐标为: %.3f, %.3f, %.3f' % (
             self.x, self.y, self.z
         )
+
+    # 重写 << 运算符使其不改变对象地址
+    def __lshift__(self, point):
+        self.x = point.x
+        self.y = point.y
+        self.z = point.z
+        return self
 
 
 class Vector(Point):

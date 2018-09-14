@@ -1,4 +1,5 @@
-from engine.entity.base.BasicEntity import BasicEntity
+from engine.entity.base.DynamicEntity import DynamicEntity
+from engine.entity.base.StaticEntity import StaticEntity
 
 
 class World:
@@ -8,6 +9,8 @@ class World:
     point_list = []
     # 线列表
     line_list = []
+    # 动态实体列表
+    dynamic_list = []
 
     # 初始化设置玩家
     def __init__(self, player):
@@ -22,13 +25,24 @@ class World:
         for e_point in static_entity.point_list:
             self.point_list.append(e_point)
 
+    # 新增动态实体
+    def add_dynamic_entity(self, dynamic_entity):
+        self.dynamic_list.append(dynamic_entity)
+        self.add_static_entity(dynamic_entity)
+
     # 新增实体
     def put(self, entity):
-        if isinstance(entity, BasicEntity):
+        if isinstance(entity, StaticEntity):
             self.add_static_entity(entity)
+        elif isinstance(entity, DynamicEntity):
+            self.add_dynamic_entity(entity)
         elif isinstance(entity, list):
             for singleEntity in entity:
                 self.add_static_entity(singleEntity)
+
+    def update(self, dt):
+        for dynamic in self.dynamic_list:
+            dynamic.update(dt)
 
     # 判断是否可见
     def charge_visible(self):

@@ -3,13 +3,10 @@ from engine.entity.base.DynamicEntity import DynamicEntity
 
 
 class Player(DynamicEntity):
-    # 玩家坐标
-    location = None
-    # 玩家面部朝向
-    face_to = None
 
     # 初始化设置位置及面朝方向
     def __init__(self, location, face_to):
+        super().__init__(location, face_to)
         self.location = location
         self.face_to = face_to
 
@@ -36,6 +33,10 @@ class Player(DynamicEntity):
         self.location -= move_to
         # TODO 会发生什么？
         # self.location.turn_sphere()
+
+
+    def update(self, dt):
+        pass
 
     # 打印人物信息
     def __str__(self):
